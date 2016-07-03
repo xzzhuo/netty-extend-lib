@@ -2,7 +2,7 @@
  * Author: xiaozhao
  */
 
-package exhi.net.netty;
+package exhi.net.interface1;
 
 public enum LogLevel {
 	Debug,

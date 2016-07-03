@@ -14,6 +14,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import exhi.net.interface1.LogLevel;
+
 public class NetLog {
 	private static final String mPath 	= "logs";
 	
