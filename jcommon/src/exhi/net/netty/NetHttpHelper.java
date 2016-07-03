@@ -4,11 +4,14 @@
 
 package exhi.net.netty;
 
+import exhi.net.interface1.INetConfig;
+
 class NetHttpHelper {
 
 	private static NetHttpHelper mHttpHelper = new NetHttpHelper();
 	
-	private Class<NetProcess> mWebProcessClass = null;
+	private NetProcess mWebProcess = null;
+	private INetConfig mConfig = null;
 	
 	private NetHttpHelper()
 	{
@@ -20,20 +23,29 @@ class NetHttpHelper {
 		return NetHttpHelper.mHttpHelper;
 	}
 	
-	public void setProcess(Class<NetProcess> processClass)
+	public void setProcess(NetProcess process)
 	{
-		this.mWebProcessClass = processClass;
+		this.mWebProcess = process;
 	}
 	
 	public NetProcess newProcessInstance()
 			throws InstantiationException, IllegalAccessException {
-		if (mWebProcessClass != null)
+		if (this.mWebProcess != null)
 		{
-			return mWebProcessClass.newInstance();
+			return this.mWebProcess.getClass().newInstance();
 		}
 		else
 		{
 			return null;
 		}
+	}
+
+	public void setConfig(INetConfig config)
+	{
+		this.mConfig = config;
+	}
+	
+	public INetConfig getConfig() {
+		return this.mConfig;
 	}
 }

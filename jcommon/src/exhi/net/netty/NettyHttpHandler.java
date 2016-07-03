@@ -4,12 +4,17 @@
 
 package exhi.net.netty;
 
+import static io.netty.buffer.Unpooled.copiedBuffer;
+import static io.netty.handler.codec.http.HttpHeaders.Names.CONNECTION;
+import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
 import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpHeaders.Names.COOKIE;
+import static io.netty.handler.codec.http.HttpHeaders.Names.LOCATION;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,8 +23,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import exhi.net.interface1.INetConfig;
+import exhi.net.interface1.NetCharset;
+import exhi.net.netty.NettyResult.ReturnType;
 import exhi.net.utils.NetUtils;
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -31,6 +42,7 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpObject;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.codec.http.cookie.Cookie;
@@ -84,16 +96,6 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 		this.sendError(ctx, HttpResponseStatus.FORBIDDEN);
 	}
 
-	private void sendError(ChannelHandlerContext ctx, HttpResponseStatus status) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, status, Unpooled.copiedBuffer("Failure: " + status + "\r\n", CharsetUtil.UTF_8));  
-        response.headers().set(CONTENT_TYPE, "text/plain; charset=UTF-8");  
-   
-        // Close the connection as soon as the error message is sent.  
-        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);  
-        
-        ctx.channel().close();
-    }
-	
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, Object msg)
 			throws Exception {
@@ -179,6 +181,7 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 			BFCLog.debug(getChannelAddress(), "Require URI: " + uri);
 			BFCLog.debug(getChannelAddress(), "Method: " + method);
 			BFCLog.debug(getChannelAddress(), "Version: " + mRequest.getProtocolVersion().text());
+			BFCLog.debug(getChannelAddress(), "Charset: " + NetHttpHelper.instance().getConfig().getCharset().name());
 			
 			for (Entry<String, String> entry : mRequest.headers()) {
 				BFCLog.debug(getChannelAddress(), "Header: " + entry.getKey() + '=' + entry.getValue());
@@ -324,5 +327,138 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 			this.sendError(ctx, HttpResponseStatus.NOT_IMPLEMENTED);
 			return;
 		}
+		
+		INetConfig config = NetHttpHelper.instance().getConfig();
+		String charset = NetUtils.AdapterContentCharset(config.getCharset());
+		
+		// Call inner process
+		NettyResult nettyResult = this.mNettyProcess.innerProcess(getChannelAddress(), uri, cookies, files, request, charset);
+		
+		if (nettyResult == null)
+		{
+			this.sendError(ctx, HttpResponseStatus.NOT_FOUND);
+		}
+		else if (nettyResult.getReturnType() == ReturnType.ERR_NOT_FOUND)
+		{
+			String val = uri;
+			int index = val.indexOf('?');
+			if (index > 0)
+			{
+				val = val.substring(0, index);
+			}
+			NettyResult result = this.mNettyProcess.innerErrorNotFind(getChannelAddress(), val);
+			if (result.getReturnType() == ReturnType.ERR_NOT_IMPLEMENT_404_CALLBACK)
+			{
+				// if not implement the callback for 404 then show error message
+				BFCLog.error(getChannelAddress(), "'" + nettyResult.getFilePath() +"' is not exist");
+				this.sendError(ctx, HttpResponseStatus.NOT_FOUND);
+			}
+			else
+			{
+				writeResponse(ctx.channel(), result.getText(), "text/html", config.getCharset());
+			}
+		}
+		else
+		{
+			if (nettyResult.getReturnType() == ReturnType.LOCATION)
+			{
+				// relocation
+				this.relocation(ctx, nettyResult.getText().toString());
+			}
+			else if (nettyResult.getReturnType() == ReturnType.FILE)
+			{
+				
+			}
+			else if (nettyResult.getReturnType() == ReturnType.TEXT)
+			{
+				// process test file
+				if (nettyResult.getText() == null)
+				{
+					BFCLog.error(getChannelAddress(), "text is empty");
+					this.sendError(ctx, HttpResponseStatus.NOT_FOUND);
+				}
+				else
+				{
+					writeResponse(ctx.channel(), nettyResult.getText(), nettyResult.getMimeType(),
+							config.getCharset());
+				}
+			}
+		}
 	}
+	
+	private Charset adapterCharset(NetCharset charset)
+    {
+    	Charset type = CharsetUtil.UTF_8;
+    	switch (charset)
+    	{
+    	case ISO_8859_1:
+    		type = CharsetUtil.ISO_8859_1;
+    		break;
+    	case US_ASCII:
+    		type = CharsetUtil.US_ASCII;
+    		break;
+    	case UTF_16:
+    		type = CharsetUtil.UTF_16;
+    		break;
+    	case UTF_16BE:
+    		type = CharsetUtil.UTF_16BE;
+    		break;
+    	case UTF_16LE:
+    		type = CharsetUtil.UTF_16LE;
+    		break;
+    	case UTF_8:
+    		type = CharsetUtil.UTF_8;
+    		break;
+    	}
+    	
+    	return type;
+    }
+	
+	private void writeResponse(Channel channel, StringBuilder responseValue, String mimeType,
+			NetCharset charset) {
+		// Convert the response content to a ChannelBuffer.
+        ByteBuf buf = copiedBuffer(responseValue, adapterCharset(charset));
+ 
+        // Decide whether to close the connection or not.
+        boolean close = mRequest.headers().contains(CONNECTION, HttpHeaders.Values.CLOSE, true)
+                || mRequest.getProtocolVersion().equals(HttpVersion.HTTP_1_0)
+                && !mRequest.headers().contains(CONNECTION, HttpHeaders.Values.KEEP_ALIVE, true);
+ 
+        // Build the response object.
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, buf);
+
+        String contentType = String.format("%s; charset=%s", mimeType, NetUtils.AdapterContentCharset(charset));
+        response.headers().set(CONTENT_TYPE, contentType);
+ 
+        if (!close) {
+            // There's no need to add 'Content-Length' header
+            // if this is the last response.
+            response.headers().set(CONTENT_LENGTH, buf.readableBytes());
+        }
+
+        // Write the response.
+        ChannelFuture future = channel.writeAndFlush(response);
+        // Close the connection after the write operation is done if necessary.
+        if (close) {
+            future.addListener(ChannelFutureListener.CLOSE);
+        }
+	}
+
+	private void relocation(ChannelHandlerContext ctx, String newUri) {  
+        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, HttpResponseStatus.FOUND);  
+        response.headers().set(LOCATION, newUri);  
+
+        // Close the connection as soon as the error message is sent.  
+        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+    }
+	
+	private void sendError(ChannelHandlerContext ctx, HttpResponseStatus status) {
+        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, status, Unpooled.copiedBuffer("Failure: " + status + "\r\n", CharsetUtil.UTF_8));  
+        response.headers().set(CONTENT_TYPE, "text/plain; charset=UTF-8");  
+
+        // Close the connection as soon as the error message is sent.  
+        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);  
+        
+        ctx.channel().close();
+    } 
 }
