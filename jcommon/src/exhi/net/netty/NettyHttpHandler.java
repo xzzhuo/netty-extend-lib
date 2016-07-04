@@ -51,6 +51,7 @@ import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.netty.handler.codec.http.multipart.Attribute;
 import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
 import io.netty.handler.codec.http.multipart.DiskFileUpload;
+import io.netty.handler.codec.http.multipart.FileUpload;
 import io.netty.handler.codec.http.multipart.HttpDataFactory;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
@@ -342,6 +343,44 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
                         + attribute.toString());
             }
             mRequestsParam.put(attribute.getName(), value);
+        }
+        else if (data.getHttpDataType() == HttpDataType.FileUpload)
+        {
+        	BFCLog.debug(getChannelAddress(), "File upload");
+        	
+        	FileUpload fileUpload = (FileUpload) data;
+        	NetFile netFile = new NetFile();
+        	
+        	if (fileUpload.isCompleted()) {
+        		
+        		try {
+        			File uploadFile = new File(fileUpload.getFilename());
+	        		File tempDir = new File(NetHttpHelper.instance().getConfig().getTempPath());
+	        		
+	        		File tempFile = File.createTempFile("netup_", "_"+uploadFile.getName(), tempDir);
+	        		fileUpload.renameTo(tempFile);
+	        		mTempFile.add(tempFile.getAbsolutePath());
+	        		
+	            	netFile.name = uploadFile.getName();
+	            	netFile.size = fileUpload.length();
+	            	netFile.error = 0;
+	            	netFile.tmp_name = tempFile.getAbsolutePath();
+					netFile.type = NetUtils.getMimeType(netFile.name);
+	
+	            	mNetFiles.put(fileUpload.getName(), netFile);
+	            	
+	            	BFCLog.debug(getChannelAddress(), "Upload, key=" + fileUpload.getName());
+	            	BFCLog.debug(getChannelAddress(), "Upload, netFile.name="+netFile.name);
+	        		BFCLog.debug(getChannelAddress(), "Upload, netFile.size="+String.format("%d", netFile.size));
+	        		BFCLog.debug(getChannelAddress(), "Upload, netFile.tmp_name="+netFile.tmp_name);
+	        		BFCLog.debug(getChannelAddress(), "Upload, netFile.type="+netFile.type);
+	        		BFCLog.debug(getChannelAddress(), "Upload, netFile.error="+String.format("%d", netFile.error));
+        		
+        		} catch (IOException e) {
+        			netFile.error = 1;
+        			BFCLog.error(getChannelAddress(), "upload file failed: " + e.getMessage());
+				}
+        	}
         }
 	}
 	

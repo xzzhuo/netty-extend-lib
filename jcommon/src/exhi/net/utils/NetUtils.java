@@ -14,6 +14,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.FileNameMap;
+import java.net.URLConnection;
 import java.net.URLDecoder;
 
 import exhi.net.interface1.NetCharset;
@@ -129,4 +131,11 @@ public class NetUtils {
 		
 		return text;
 	}
+	
+	public static String getMimeType(String fileUrl) 
+    {
+    	FileNameMap fileNameMap = URLConnection.getFileNameMap();
+        String type = fileNameMap.getContentTypeFor(fileUrl);
+    	return type;
+    }
 }

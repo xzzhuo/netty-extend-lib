@@ -26,8 +26,12 @@ public class NettyTest {
 				String html = "<html><header><title>netty-extend-lib</title></header><body>%s</body></html>";
 				if (uri.contains("test"))
 				{
-					// StringBuilder sb = new StringBuilder();
-					this.print(String.format(html, "<p>This is test for netty-extend-lib</p><form action='file' enctype ='multipart/form-data' method='post'><input name='file_name'><input type='file'><input type='submit' value='submit'></form>"));
+					StringBuilder sb = new StringBuilder();
+					sb.append("<p>This is test for netty-extend-lib</p>");
+					sb.append("<form action='file' enctype ='multipart/form-data' method='post'>");
+					sb.append("<input name='file_name' value='test_file'><input type='file' name='test_file'><input type='submit' value='submit'>");
+					sb.append("</form>");
+					this.print(String.format(html, sb.toString()));
 				}
 				else if (uri.contains("file"))
 				{
