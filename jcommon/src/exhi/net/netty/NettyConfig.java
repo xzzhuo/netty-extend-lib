@@ -1,3 +1,7 @@
+/**
+ * Author: xiaozhao
+ */
+
 package exhi.net.netty;
 
 import exhi.net.interface1.INetConfig;

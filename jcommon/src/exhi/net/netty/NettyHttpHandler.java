@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -434,6 +435,27 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 			{
 				// relocation
 				this.relocation(ctx, nettyResult.getText().toString(), this.mNettyProcess.getCookies());
+			}
+			else if (nettyResult.getReturnType() == ReturnType.FILE)
+			{
+				// download files, must give the full file path
+				if (nettyResult.getFilePath() == null)
+				{
+					BFCLog.error(getChannelAddress(), "File not find");
+					this.sendErrorWithCookies(ctx, HttpResponseStatus.NOT_FOUND, this.mNettyProcess.getCookies());
+				}
+				else
+				{
+					try {
+						NettyDownload.sendFile(this.mRequest, ctx, nettyResult.getFilePath());
+					} catch (ParseException e) {
+						BFCLog.debug(getChannelAddress(), e.getMessage());
+						this.sendErrorWithCookies(ctx, HttpResponseStatus.EXPECTATION_FAILED, this.mNettyProcess.getCookies());
+					} catch (IOException e) {
+						BFCLog.debug(getChannelAddress(), e.getMessage());
+						this.sendErrorWithCookies(ctx, HttpResponseStatus.EXPECTATION_FAILED, this.mNettyProcess.getCookies());
+					}
+				}
 			}
 			else if (nettyResult.getReturnType() == ReturnType.TEXT)
 			{
