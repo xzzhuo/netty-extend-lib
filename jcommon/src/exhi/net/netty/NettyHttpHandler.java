@@ -13,6 +13,7 @@ import static io.netty.handler.codec.http.HttpHeaders.Names.LOCATION;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -47,6 +48,7 @@ import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
+import io.netty.handler.codec.http.multipart.Attribute;
 import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
 import io.netty.handler.codec.http.multipart.DiskFileUpload;
 import io.netty.handler.codec.http.multipart.HttpDataFactory;
@@ -54,6 +56,7 @@ import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder.EndOfDataDecoderException;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder.ErrorDataDecoderException;
+import io.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType;
 import io.netty.util.CharsetUtil;
 
 class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
@@ -314,6 +317,32 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 		
 		BFCLog.debug(getChannelAddress(), "NettyHttpHandler - receiveHttpData()");
 		
+		/**
+         * HttpDataType
+         * Attribute, FileUpload, InternalAttribute
+         */
+        if (data.getHttpDataType() == HttpDataType.Attribute) {
+            Attribute attribute = (Attribute) data;
+            String value;
+            try {
+                value = attribute.getValue();
+            } catch (IOException e1) {
+                BFCLog.debug(getChannelAddress(), "BODY Attribute: " + attribute.getHttpDataType().name() + ":"
+                        + attribute.getName() + " Error while reading value: " + e1.getMessage());
+                return;
+            }
+            
+            // MyLog.debug(getChannelAddress(), "value = " + value);
+            
+            if (value.length() > 4096) {
+            	BFCLog.warning(getChannelAddress(), "BODY Attribute: " + attribute.getHttpDataType().name() + ":"
+                        + attribute.getName() + " data too long");
+            } else {
+            	BFCLog.debug(getChannelAddress(), "BODY Attribute: " + attribute.getHttpDataType().name() + ":"
+                        + attribute.toString());
+            }
+            mRequestsParam.put(attribute.getName(), value);
+        }
 	}
 	
 	private void process(ChannelHandlerContext ctx, String uri, Set<Cookie> cookies,
