@@ -1,3 +1,7 @@
+/**
+ * Author: xiaozhao
+ */
+
 package exhi.net.interface1;
 
 public enum ServerType {

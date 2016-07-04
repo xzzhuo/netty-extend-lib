@@ -1,5 +1,8 @@
-package exhi.net.interface1;
+/**
+ * Author: xiaozhao
+ */
 
+package exhi.net.interface1;
 
 public interface INetConfig {
 
