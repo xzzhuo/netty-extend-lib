@@ -9,7 +9,7 @@ import exhi.net.interface1.INetConfig;
 class NetHttpHelper {
 
 	private static NetHttpHelper mHttpHelper = new NetHttpHelper();
-	
+
 	private NetProcess mWebProcess = null;
 	private INetConfig mConfig = null;
 	

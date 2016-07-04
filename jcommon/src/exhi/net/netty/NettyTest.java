@@ -26,6 +26,8 @@ public class NettyTest {
 				String html = "<html><header><title>netty-extend-lib</title></header><body>%s</body></html>";
 				if (uri.contains("test"))
 				{
+					this.setCookie("name", "test", 60);
+					
 					StringBuilder sb = new StringBuilder();
 					sb.append("<p>This is test for netty-extend-lib</p>");
 					sb.append("<form action='file' enctype ='multipart/form-data' method='post'>");

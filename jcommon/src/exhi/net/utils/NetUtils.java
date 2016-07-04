@@ -131,7 +131,7 @@ public class NetUtils {
 		
 		return text;
 	}
-	
+
 	public static String getMimeType(String fileUrl) 
     {
     	FileNameMap fileNameMap = URLConnection.getFileNameMap();

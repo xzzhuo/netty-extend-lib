@@ -5,9 +5,11 @@
 package exhi.net.netty;
 
 import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.util.internal.SystemPropertyUtil;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -22,6 +24,8 @@ public abstract class NetProcess {
 	private StringBuilder mResponseText = new StringBuilder();
 	private NettyResult mDeathResult = null;		// if this value is not null, return this value
 	private Map<String, NetFile> mNetFiles = null;
+	private Map<String, Cookie> mDownCookies = null;
+	private Map<String, Cookie> mUpCookies = new HashMap<String, Cookie>();
 	private String mUri = "";
 	private boolean bIsNotImplement404Callback = false;
 	
@@ -150,6 +154,14 @@ public abstract class NetProcess {
 			mNetFiles = files;
 		}
 
+		// move cookies
+		mDownCookies = new HashMap<String, Cookie>();
+		for (Cookie cookie : cookies)
+		{
+			// MyLog.debug("NetProcess", String.format("%s=%s", cookie.getName(),cookie.getValue()));
+			mDownCookies.put(cookie.name(), cookie);
+        }
+
 		mDeathResult = null;
 		NettyResult result = new NettyResult();
 		
@@ -276,5 +288,83 @@ public abstract class NetProcess {
 	protected String getWorkPath()
 	{
 		return SystemPropertyUtil.get("user.dir");
+	}
+
+	protected String getCookie(String key) {
+		
+		String value = null;
+		if (this.mDownCookies.containsKey(key))
+		{
+			value = this.mDownCookies.get(key).value();
+			try {
+				value = java.net.URLDecoder.decode(value, "utf-8");
+			} catch (UnsupportedEncodingException e) {
+			}
+		}
+		
+		return value;
+	}
+
+	protected void setCookie(String key, String value) {
+		
+		String newValue = "";
+		try {
+			newValue = java.net.URLEncoder.encode(value, "utf-8");
+		} catch (UnsupportedEncodingException e) {
+		}
+		
+		DefaultCookie cookie = new DefaultCookie(key, newValue);
+		this.mUpCookies.put(key, cookie);	// 用于保存新值
+		this.mDownCookies.put(key, cookie);	// 用于即时更新
+	}
+	
+	// expires: seconds
+	protected void setCookie(String key, String value, long expires) {
+		
+		String newValue = "";
+		try {
+			newValue = java.net.URLEncoder.encode(value, "utf-8");
+		} catch (UnsupportedEncodingException e) {
+		}
+		
+		DefaultCookie cookie = new DefaultCookie(key, newValue);
+		cookie.setMaxAge(expires);
+
+		this.mUpCookies.put(key, cookie);	// 用于保存新值
+		this.mDownCookies.put(key, cookie);	// 用于即时更新
+	}
+	
+	// expires: seconds
+	protected void setCookie(String key, String value, long expires, String path) {
+		
+		String newValue = "";
+		try {
+			newValue = java.net.URLEncoder.encode(value, "utf-8");
+		} catch (UnsupportedEncodingException e) {
+		}
+		
+		DefaultCookie cookie = new DefaultCookie(key, newValue);
+		cookie.setMaxAge(expires);
+		cookie.setPath(path);
+
+		this.mUpCookies.put(key, cookie);	// 用于保存新值
+		this.mDownCookies.put(key, cookie);	// 用于即时更新
+	}
+	
+	/**
+	 * Delete the cookie value by given key
+	 * @param key the key of cookie
+	 */
+	protected void deleteCookie(String key)
+	{
+		if (this.mUpCookies.containsKey(key) || this.mDownCookies.containsKey(key))
+		{
+			this.setCookie(key, "", -1);
+		}
+	}
+	
+	Map<String, Cookie> getCookies()
+	{
+		return this.mUpCookies;
 	}
 }

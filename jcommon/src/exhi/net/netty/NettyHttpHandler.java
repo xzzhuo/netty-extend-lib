@@ -10,6 +10,7 @@ import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
 import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpHeaders.Names.COOKIE;
 import static io.netty.handler.codec.http.HttpHeaders.Names.LOCATION;
+import static io.netty.handler.codec.http.HttpHeaders.Names.SET_COOKIE;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.io.File;
@@ -49,6 +50,7 @@ import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.netty.handler.codec.http.multipart.Attribute;
+import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
 import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
 import io.netty.handler.codec.http.multipart.DiskFileUpload;
 import io.netty.handler.codec.http.multipart.FileUpload;
@@ -423,7 +425,7 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 			}
 			else
 			{
-				writeResponse(ctx.channel(), result.getText(), "text/html", config.getCharset());
+				writeResponse(ctx.channel(), result.getText(), "text/html", config.getCharset(), null);
 			}
 		}
 		else
@@ -431,11 +433,7 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 			if (nettyResult.getReturnType() == ReturnType.LOCATION)
 			{
 				// relocation
-				this.relocation(ctx, nettyResult.getText().toString());
-			}
-			else if (nettyResult.getReturnType() == ReturnType.FILE)
-			{
-				
+				this.relocation(ctx, nettyResult.getText().toString(), this.mNettyProcess.getCookies());
 			}
 			else if (nettyResult.getReturnType() == ReturnType.TEXT)
 			{
@@ -443,12 +441,12 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 				if (nettyResult.getText() == null)
 				{
 					BFCLog.error(getChannelAddress(), "text is empty");
-					this.sendError(ctx, HttpResponseStatus.NOT_FOUND);
+					this.sendErrorWithCookies(ctx, HttpResponseStatus.NOT_FOUND, this.mNettyProcess.getCookies());
 				}
 				else
 				{
 					writeResponse(ctx.channel(), nettyResult.getText(), nettyResult.getMimeType(),
-							config.getCharset());
+							config.getCharset(), this.mNettyProcess.getCookies());
 				}
 			}
 		}
@@ -483,7 +481,7 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
     }
 	
 	private void writeResponse(Channel channel, StringBuilder responseValue, String mimeType,
-			NetCharset charset) {
+			NetCharset charset, Map<String, Cookie> newCookies) {
 		// Convert the response content to a ChannelBuffer.
         ByteBuf buf = copiedBuffer(responseValue, adapterCharset(charset));
  
@@ -503,6 +501,8 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
             // if this is the last response.
             response.headers().set(CONTENT_LENGTH, buf.readableBytes());
         }
+ 
+        this.saveCookies(response, newCookies);
 
         // Write the response.
         ChannelFuture future = channel.writeAndFlush(response);
@@ -511,11 +511,20 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
             future.addListener(ChannelFutureListener.CLOSE);
         }
 	}
-
-	private void relocation(ChannelHandlerContext ctx, String newUri) {  
+	
+	@SuppressWarnings("unused")
+	private void writeResponse(Channel channel, String responseValue, 
+			String mimeType, NetCharset charset, Map<String, Cookie> newCookies)
+    {
+    	writeResponse(channel, new StringBuilder(responseValue), mimeType, charset, newCookies);
+    }
+	
+	private void relocation(ChannelHandlerContext ctx, String newUri, Map<String, Cookie> newCookies) {  
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, HttpResponseStatus.FOUND);  
         response.headers().set(LOCATION, newUri);  
-
+   
+        this.saveCookies(response, newCookies);
+        
         // Close the connection as soon as the error message is sent.  
         ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
     }
@@ -523,10 +532,54 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 	private void sendError(ChannelHandlerContext ctx, HttpResponseStatus status) {
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, status, Unpooled.copiedBuffer("Failure: " + status + "\r\n", CharsetUtil.UTF_8));  
         response.headers().set(CONTENT_TYPE, "text/plain; charset=UTF-8");  
-
+   
+        this.saveCookies(response, null);
+        
         // Close the connection as soon as the error message is sent.  
         ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);  
         
         ctx.channel().close();
     } 
+
+	private void sendErrorWithCookies(ChannelHandlerContext ctx, HttpResponseStatus status, Map<String, Cookie> newCookies) {
+        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, status, Unpooled.copiedBuffer("Failure: " + status + "\r\n", CharsetUtil.UTF_8));  
+        response.headers().set(CONTENT_TYPE, "text/plain; charset=UTF-8");  
+   
+        this.saveCookies(response, newCookies);
+        
+        // Close the connection as soon as the error message is sent.  
+        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);  
+        
+        ctx.channel().close();
+    }
+	
+	private void saveCookies(FullHttpResponse response, Map<String, Cookie> newCookies)
+	{
+		/*
+		Set<Cookie> cookies;
+        String value = mRequest.headers().get(COOKIE);
+        if (value == null) {
+            cookies = Collections.emptySet();
+        } else {
+            cookies = ServerCookieDecoder.STRICT.decode(value);
+        }
+        if (!cookies.isEmpty()) {
+            // Reset the cookies if necessary.
+            for (Cookie cookie : cookies) {
+            	response.headers().add(SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie));
+            }
+        }
+        */
+
+		// add new cookies
+		if (newCookies != null)
+        {
+	        for (Entry<String, Cookie> entry : newCookies.entrySet()) {
+	        	if (entry.getValue() != null)
+	        	{
+	        		response.headers().add(SET_COOKIE, ServerCookieEncoder.STRICT.encode(entry.getValue()));
+	        	}
+	        }
+        }
+	}
 }
