@@ -17,6 +17,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.FileNameMap;
 import java.net.URLConnection;
 import java.net.URLDecoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import exhi.net.interface1.NetCharset;
 
@@ -138,4 +140,34 @@ public class NetUtils {
         String type = fileNameMap.getContentTypeFor(fileUrl);
     	return type;
     }
+	
+	/**
+     * Compute MD5 value
+     * @param string input value
+     * @return return MD5 value
+     */
+    public static String computeMd5(String string) {
+		byte[] data = string.getBytes();
+		MessageDigest md = null;
+		boolean result = false;
+		try {
+			md = MessageDigest.getInstance("MD5");
+			md.update(data, 0, data.length);
+			data = md.digest();
+			result = true;
+		} catch (NoSuchAlgorithmException e) {
+			
+		}
+
+		StringBuilder sb = new StringBuilder();
+		if (result == true)
+		{
+			for (byte b:data)
+			{
+				sb.append(String.format("%02X", b));
+			}
+		}
+
+		return sb.toString();
+	}
 }

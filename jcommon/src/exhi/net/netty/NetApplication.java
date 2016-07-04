@@ -4,13 +4,51 @@ import java.io.File;
 
 import exhi.net.interface1.INetApplication;
 import exhi.net.interface1.INetConfig;
+import exhi.net.utils.NetUtils;
 
 public abstract class NetApplication implements INetApplication {
 
 	private NetHttpHelper mWebHelper = NetHttpHelper.instance();
 	
+	private static String getDictionaryString(byte[] index)
+    {
+    	final char[] DICTIONARY = {
+    		'o','l','p','S','6','4','A','c','D','5','D','s','P','7','g','V',
+    		'Y','8','v','D','I','W','r','j','1','9','g','j','3','T','d','6',
+    		'G','i','Z','0','q','S','E','a','k','h','b','E','O','K','w','3',
+    		'n','u','s','y','C','Q','c','6','9','F','m','p','R','n','h','f',
+    		'm','Q','b','O','Y','0','3','x','I','G','T','A','4','U','7','F',
+    		'W','p','y','t','8','R','z','L','v','C','J','x','a','I','l','V',
+    		'H','r','5','d','q','K','f','P','X','H','o','B','X','C','L','M',
+    		'T','N','e','Z','2','w','e','U','2','N','M','1','W','T','D','9'
+    	};
+    	
+    	StringBuilder sb = new StringBuilder();
+    	for (byte i : index)
+    	{
+    		if (i<0)
+    		{
+    			i += 128;
+    		}
+    		sb.append(DICTIONARY[i]);
+    	}
+    	
+    	String value = sb.toString();
+    	
+    	return value;
+    }
+	
 	public void run(String[] args, String apiKey)
 	{
+		String appName = this.getClass().getName();
+		byte[] ps = {-35, 6, 56, -3, 127, 36, 79, -28, 8, 76};
+		
+		if (!NetUtils.computeMd5(String.format("%s%s", appName, getDictionaryString(ps))).equals(apiKey))
+		{
+			BFCLog.error(NetConstant.System, "Api key is incorrect");
+			return;
+		}
+		
 		this.initialize();
 	}
 	
