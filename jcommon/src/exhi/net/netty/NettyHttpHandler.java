@@ -540,7 +540,7 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 		}
 		
 		INetConfig config = NetHttpHelper.instance().getConfig();
-		String charset = NetUtils.AdapterContentCharset(config.getCharset());
+		String charset = NetUtils.adapterContentCharset(config.getCharset());
 		
 		// Call inner process
 		NettyResult nettyResult = this.mNettyProcess.innerProcess(getChannelAddress(), uri, cookies, files, request, charset);
@@ -655,7 +655,7 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
         // Build the response object.
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, buf);
 
-        String contentType = String.format("%s; charset=%s", mimeType, NetUtils.AdapterContentCharset(charset));
+        String contentType = String.format("%s; charset=%s", mimeType, NetUtils.adapterContentCharset(charset));
         response.headers().set(CONTENT_TYPE, contentType);
  
         if (!close) {

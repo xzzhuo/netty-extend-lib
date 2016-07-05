@@ -39,7 +39,7 @@ public class NetUtils {
         return uri;
 	}
 
-	public static String AdapterContentCharset(NetCharset charset) {
+	public static String adapterContentCharset(NetCharset charset) {
 		String type = "UTF-8";
     	switch (charset)
     	{

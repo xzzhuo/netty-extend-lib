@@ -45,7 +45,7 @@ public class WebUtil {
 			@SuppressWarnings("deprecation")
 			Configuration cfg = new Configuration();
 			cfg.setDirectoryForTemplateLoading(new File(mTemplatePath));
-			Template template = cfg.getTemplate(name, NetUtils.AdapterContentCharset(charset));
+			Template template = cfg.getTemplate(name, NetUtils.adapterContentCharset(charset));
 			
 			StringWriter sw = new StringWriter();
 			template.process(mParam, sw);
