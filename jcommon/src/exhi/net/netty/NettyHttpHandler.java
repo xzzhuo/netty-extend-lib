@@ -38,7 +38,9 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.TooLongFrameException;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpHeaders;
@@ -62,6 +64,13 @@ import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder.EndOfDataDecoderException;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder.ErrorDataDecoderException;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.util.CharsetUtil;
 
 class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
@@ -79,6 +88,10 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
     private Map<String, NetFile> mNetFiles = new HashMap<String, NetFile>();
     private List<String> mTempFile = new ArrayList<String>();
 	
+    // WebSocket handshaker
+    private WebSocketServerHandshaker mHandshaker = null;
+    private WebSocket mWebsocket = NetHttpHelper.instance().getWebsocket();
+    
 	public NettyHttpHandler(String client)
 	{	
 		this.mClient = client;
@@ -94,14 +107,37 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
     	
 		BFCLog.debug(getChannelAddress(), "NettyHttpHandler - channelInactive()");
 
+		if (mHandshaker != null)
+		{
+        	this.mWebsocket.removeChannel(ctx.channel());
+            mHandshaker = null;
+		}
     }
 	
 	@Override 
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
 
-		BFCLog.warning(getChannelAddress(), "Exception caught: " + cause.getMessage());
-		
-		this.sendError(ctx, HttpResponseStatus.FORBIDDEN);
+		if (mHandshaker == null)
+		{
+			BFCLog.error(getChannelAddress(), "Exception caught: " + cause.getMessage());
+			
+			if (cause instanceof TooLongFrameException)
+			{
+				if (ctx.channel().isActive()) {  
+					this.sendError(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR);  
+				}
+			}
+			else
+			{
+				if (ctx.channel().isActive()) {  
+					this.sendError(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR);  
+				}
+			}
+		}
+		else
+		{
+			BFCLog.warning(getChannelAddress(), "Exception caught: " + cause.getMessage());
+		}
 	}
 
 	@Override
@@ -109,42 +145,60 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 			throws Exception {
 		
 		BFCLog.debug(getChannelAddress(), "Enter NettyHttpHandler - channelRead0()");
-		boolean result = false;
+		
+		if (mHandshaker == null)
+		{
+			BFCLog.debug(getChannelAddress(), "mHandshaker is null");
+		}
+		else
+		{
+			BFCLog.debug(getChannelAddress(), "mHandshaker is not null");
+		}
 		
 		if (msg instanceof HttpObject)
 		{
-			NetHttpHelper helper = NetHttpHelper.instance();
-
-			if (helper != null)
+			if (WebSocketHelper.isSupportWebSocket((HttpRequest) msg))
 			{
-				try {
-					mNettyProcess = helper.newProcessInstance();
-				} catch (InstantiationException e) {
-					BFCLog.error(getChannelAddress(), "Instance process failed: " + e.getMessage());
-				} catch (IllegalAccessException e) {
-					BFCLog.error(getChannelAddress(), "Instance process failed: " + e.getMessage());
-				}
-				
-				if (mNettyProcess != null)
-				{
-					this.handleHttpRequest(ctx, (HttpObject)msg);
-					result = true;
-				}
-				else
-				{
-					BFCLog.error(getChannelAddress(), "Instance process failed");
-				}
+				BFCLog.debug(getChannelAddress(), "WebSocket connect request");
+				this.handshakeWebSocket(ctx, (FullHttpRequest)msg);
 			}
 			else
 			{
-				BFCLog.error(getChannelAddress(), "Not provider the http helper object");
+				NetHttpHelper helper = NetHttpHelper.instance();
+	
+				if (helper != null)
+				{
+					try {
+						mNettyProcess = helper.newProcessInstance();
+					} catch (InstantiationException e) {
+						BFCLog.error(getChannelAddress(), "Instance process failed: " + e.getMessage());
+					} catch (IllegalAccessException e) {
+						BFCLog.error(getChannelAddress(), "Instance process failed: " + e.getMessage());
+					}
+					
+					if (mNettyProcess != null)
+					{
+						this.handleHttpRequest(ctx, (HttpObject)msg);
+					}
+					else
+					{
+						BFCLog.error(getChannelAddress(), "Instance process failed");
+					}
+				}
+				else
+				{
+					BFCLog.error(getChannelAddress(), "Not provider the http helper object");
+				}
 			}
         }
-
-		if (!result)
+		else if (msg instanceof WebSocketFrame)
 		{
-			this.sendError(ctx, HttpResponseStatus.FORBIDDEN);
-		}
+            this.handleWebSocketFrame(ctx, (WebSocketFrame) msg);
+        }
+		else
+		{
+        	BFCLog.error(getChannelAddress(), "Not handle request");
+        }
 		
 		BFCLog.debug(getChannelAddress(), "Leave NettyHttpHandler - channelRead0()");
 	}
@@ -301,6 +355,91 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
                     reset();
                 }
             }
+        }
+	}
+	
+	private void handshakeWebSocket(ChannelHandlerContext ctx, FullHttpRequest req)
+	{
+		if (mWebsocket == null)
+        {
+			BFCLog.debug(getChannelAddress(), "WebSocket not set handle object");
+			this.sendError(ctx, HttpResponseStatus.FORBIDDEN);
+			return;
+        }
+		
+		String addr = mWebsocket.getAddress();
+		if (addr == null || addr.isEmpty())
+		{
+			BFCLog.debug(getChannelAddress(), "WebSocket address invalide");
+			this.sendError(ctx, HttpResponseStatus.NOT_FOUND);
+			return;
+		}
+		
+		addr = addr.replace('\\', '/');
+		if (!addr.substring(0, 1).equals("/"))
+		{
+			addr = String.format("%c%s", '/', addr);
+		}
+		
+		String uri = req.getUri().replace('\\', '/');
+		if (addr.equalsIgnoreCase(uri))
+		{
+			BFCLog.debug(getChannelAddress(), String.format("Connect WebSocket: %s",
+					WebSocketHelper.getWebSocketLocation((FullHttpRequest) req)));
+			
+			mHandshaker = WebSocketHelper.handshakeWebSocket(ctx, req);
+	        if (mHandshaker != null)
+	        {
+	        	mWebsocket.addChannel(ctx.channel());
+	        }
+	        else
+	        {
+	        	BFCLog.error(getChannelAddress(), "WebSocket connect failed");
+	        	this.sendError(ctx, HttpResponseStatus.INSUFFICIENT_STORAGE);
+	        }
+		}
+		else
+		{
+			BFCLog.debug(getChannelAddress(), "WebSocket address incorrect");
+			this.sendError(ctx, HttpResponseStatus.NOT_FOUND);
+		}
+	}
+	
+	private void handleWebSocketFrame(ChannelHandlerContext ctx,
+			WebSocketFrame frame) {
+		
+		// Check for closing frame
+        if (frame instanceof CloseWebSocketFrame) {
+        	this.mWebsocket.removeChannel(ctx.channel());
+            mHandshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
+            mHandshaker = null;
+            return;
+        }
+        
+        if (frame instanceof PingWebSocketFrame) {
+            ctx.channel().write(new PongWebSocketFrame(frame.content().retain()));
+            return;
+        }
+        
+        if (!(frame instanceof TextWebSocketFrame)) {
+           throw new UnsupportedOperationException(String.format("%s frame types not supported", frame.getClass()
+                    .getName()));
+        }
+
+        if (frame instanceof BinaryWebSocketFrame)
+        {
+        	BFCLog.debug(getChannelAddress(), "Receive BinaryWebSocketFrame");
+        	this.mWebsocket.onMessage(ctx.channel().remoteAddress(), ((BinaryWebSocketFrame) frame).content().array());
+        }
+        else if (frame instanceof TextWebSocketFrame)
+        {
+        	BFCLog.debug(getChannelAddress(), "Receive TextWebSocketFrame");
+        	this.mWebsocket.onMessage(ctx.channel().remoteAddress(), ((TextWebSocketFrame) frame).text());
+        }
+        else
+        {
+        	BFCLog.debug(getChannelAddress(), "Receive type : " + frame.getClass().getName());
+        	this.mWebsocket.onMessage(ctx.channel().remoteAddress(), frame.content().array());
         }
 	}
 

@@ -122,6 +122,20 @@ public abstract class NetApplication implements INetApplication {
 		BFCLog.setDebugMode(debugMode);
 	}
 	
+	/**
+	 * Register websocket handler process
+	 * @param websocket Websocket handler class
+	 */
+	public void registerWebsocket(WebSocket websocket)
+	{
+		mWebHelper.setWebsocket(websocket);
+	}
+	
+	WebSocket getWebsocketObject()
+	{
+		return mWebHelper.getWebsocket();
+	}
+	
 	@Override
 	public void onInit()
 	{

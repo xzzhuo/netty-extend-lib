@@ -6,12 +6,14 @@ package exhi.net.netty;
 
 import exhi.net.interface1.INetConfig;
 
+//private class, use by library
 class NetHttpHelper {
 
 	private static NetHttpHelper mHttpHelper = new NetHttpHelper();
 
 	private NetProcess mWebProcess = null;
 	private INetConfig mConfig = null;
+	private WebSocket mWebsocket = null;
 	
 	private NetHttpHelper()
 	{
@@ -47,5 +49,13 @@ class NetHttpHelper {
 	
 	public INetConfig getConfig() {
 		return this.mConfig;
+	}
+
+	public WebSocket getWebsocket() {
+		return mWebsocket;
+	}
+
+	public void setWebsocket(WebSocket websocket) {
+		this.mWebsocket = websocket;
 	}
 }
