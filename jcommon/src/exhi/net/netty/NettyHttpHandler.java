@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import exhi.net.constant.NetConstant;
 import exhi.net.interface1.INetConfig;
 import exhi.net.interface1.NetCharset;
 import exhi.net.log.BFCLog;
@@ -109,6 +110,7 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 
 		if (mHandshaker != null)
 		{
+			BFCLog.debug(NetConstant.WebSocket, "NettyHttpHandler - remove websocket channel");
         	this.mWebsocket.removeChannel(ctx.channel());
             mHandshaker = null;
 		}
