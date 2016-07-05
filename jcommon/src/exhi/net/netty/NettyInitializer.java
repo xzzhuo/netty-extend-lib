@@ -4,6 +4,7 @@
 
 package exhi.net.netty;
 
+import exhi.net.log.BFCLog;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;

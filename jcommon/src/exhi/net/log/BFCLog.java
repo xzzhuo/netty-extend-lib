@@ -2,11 +2,9 @@
  * Author: xiaozhao
  */
 
-package exhi.net.netty;
+package exhi.net.log;
 
-import exhi.net.log.NetLog;
-
-class BFCLog {
+public class BFCLog {
 
 	static private boolean mDebugMode = false;
 	

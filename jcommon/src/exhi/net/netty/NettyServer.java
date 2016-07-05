@@ -12,6 +12,9 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 import java.net.InetSocketAddress;
 
+import exhi.net.constant.NetConstant;
+import exhi.net.log.BFCLog;
+
 class NettyServer {
 	
 	public final boolean isSSL = true;

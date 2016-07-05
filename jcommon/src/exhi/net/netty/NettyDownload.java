@@ -47,6 +47,9 @@ import java.util.TimeZone;
 
 import javax.activation.MimetypesFileTypeMap;
 
+import exhi.net.constant.NetConstant;
+import exhi.net.log.BFCLog;
+
 class NettyDownload {
 
 	public static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";

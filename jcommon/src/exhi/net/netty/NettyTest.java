@@ -6,6 +6,8 @@ package exhi.net.netty;
 
 import java.util.Map;
 
+import exhi.net.constant.NetConstant;
+import exhi.net.log.BFCLog;
 import exhi.net.log.NetLog;
 
 public class NettyTest {
