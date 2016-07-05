@@ -5,5 +5,6 @@
 	<classpathentry kind="lib" path="libs/netty-all-4.0.33.Final-javadoc.jar"/>
 	<classpathentry kind="lib" path="libs/netty-all-4.0.33.Final-sources.jar"/>
 	<classpathentry kind="lib" path="libs/netty-all-4.0.33.Final.jar"/>
+	<classpathentry kind="lib" path="libs/freemarker.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
