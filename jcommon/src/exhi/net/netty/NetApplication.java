@@ -4,6 +4,7 @@ import java.io.File;
 
 import exhi.net.interface1.INetApplication;
 import exhi.net.interface1.INetConfig;
+import exhi.net.log.NetLog;
 import exhi.net.utils.NetUtils;
 
 public abstract class NetApplication implements INetApplication {

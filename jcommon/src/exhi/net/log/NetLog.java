@@ -2,7 +2,7 @@
  * Author: xiaozhao
  */
 
-package exhi.net.netty;
+package exhi.net.log;
 
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;

@@ -4,6 +4,8 @@
 
 package exhi.net.netty;
 
+import exhi.net.log.NetLog;
+
 class BFCLog {
 
 	static private boolean mDebugMode = false;

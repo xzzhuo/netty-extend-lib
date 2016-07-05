@@ -6,6 +6,8 @@ package exhi.net.netty;
 
 import java.util.Map;
 
+import exhi.net.log.NetLog;
+
 public class NettyTest {
 
 	public static void main(String[] args) {
@@ -23,7 +25,7 @@ public class NettyTest {
 				BFCLog.debug("Test", "uri = " + uri);
 				BFCLog.debug("Test", "request = " + request.toString());
 				
-				String html = "<html><header><title>netty-extend-lib</title></header><body>%s</body></html>";
+				String html = "<html><head><title>netty-extend-lib</title></head><body>%s</body></html>";
 				if (uri.contains("test"))
 				{
 					this.setCookie("name", "test", 60);
