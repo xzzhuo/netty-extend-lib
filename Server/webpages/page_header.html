@@ -1,0 +1,102 @@
+
+<script type="text/javascript" src="./js/jquery.js"></script>
+<script type="text/javascript" src="./js/MyEditTable.js"></script>
+<script type="text/javascript" src="./js/jquery.min.js"></script>
+<script type="text/javascript" src="./js/utils.js"></script>
+
+<script type="text/javascript">
+<#if page??> <!-- no page -->
+	var url="${go_url}";
+	var act="${go_act}";
+</#if>
+</script>
+
+<#noparse>
+<script type="text/javascript">
+$(document).ready(function(){
+
+	go_pages = function(val)
+	{
+		var ps = 1;
+  		ps = Utils.isInt(val) ? val : 15;
+  		
+		$.post(url,{act:act, current_page:ps, code:Math.random()}, function(data,status)
+		{
+			if (status == "success")
+			{
+				var div_table = $(data).find("div.ajax-table");
+				if (div_table != null)
+				{
+					$("div.ajax-table").html(div_table.html());
+				}
+			}
+		});
+	}
+	
+	page_to_first = function()
+	{
+		if (current != 1)
+		{
+			current = 1;
+			go_pages(current);
+		}
+	}
+	
+	page_to_previous = function()
+	{
+		if (current > 1)
+		{
+			current --;
+			go_pages(current);
+		}
+	}
+	
+	page_to_next = function()
+	{
+		if (current < total_page)
+		{
+			current++;
+			go_pages(current);
+		}
+	}
+	
+	page_to_last = function()
+	{
+		if (current != total_page)
+		{
+			current = total_page;
+			go_pages(current);
+		}
+	}
+	
+	getPageSize = function()
+	{
+  		var ps = 15;
+  		pageSize = document.getElementById("pageSize");
+
+  		if (pageSize)
+  		{
+    		ps = Utils.isInt(pageSize.value) ? pageSize.value : 15;
+    		document.cookie = "demo_page_offsets=" + ps + ";";
+  		}
+	}
+
+	changePageSize = function(e)
+	{
+	    var evt = Utils.fixEvent(e);
+	    if (evt.keyCode == 13)
+	    {
+	    	getPageSize();
+	        go_pages(current);
+	        return false;
+	    }
+	}
+	
+}); 
+</script> 
+</#noparse>
+
+<!--
+<div id="div_barrier"></div>
+<div id="Loading" style="position:absolute;z-index:3;top:200px;left:250px;width:250;height:80;border-width:1;border-style:ridge;background-color:gray;padding-top:10px"><center><table border="0"><tr><td valign="middle"><img src="./images/wait.gif" border="0" WIDTH="64" HEIGHT="64"></td><td>&nbsp;&nbsp;</td><td valign="middle"><span id=txtLoading0 style="font-size:14px;">Notification</span><br><span id=txtLoading1 style="font-size:14px;">Loading,please wait...</span></td></tr></table></center></div>
+-->

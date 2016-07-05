@@ -1,0 +1,110 @@
+
+<#include "header.html">
+
+<script type="text/javascript" src="./js/jquery.js"></script>
+<script type="text/javascript" src="./js/MyEditTable.js"></script>
+<script type="text/javascript" src="./js/jquery.date_input.pack.js"></script>
+<script type="text/javascript" src="./js/jquery.min.js"></script>
+
+<#include "page_header.html">
+
+<#noparse>
+<script type="text/javascript">
+$(document).ready(function(){
+	
+	$("td.td_edit").click(function() {
+		var td = $(this);
+		MyTable.edit(td,"index.html","notification_edit");
+	});
+	
+	$("input.check_edit").change(function() {
+		var ckx = $(this);
+		MyTable.checked(ckx,"index.html","notification_edit_value");
+	});
+	
+	delete_item=function(item_id){
+		//alert(item_id);
+		//$("input").attr('disabled','disabled');
+		$.post("index.html",{act:"notification_delete",item_id:item_id,code:Math.random()},function(data,status){
+			//alert(data);
+			if (status == "success")
+			{
+				var div_table = $(data).find("div.ajax-table");
+				//alert(div_table.html());
+				if (div_table != null)
+				{
+					$("div.ajax-table").html(div_table.html());
+					$("td.td_edit").bind('click',function(){
+						var td1 = $(this);
+						MyTable.edit(td1,"index.html","notification_edit");
+					});
+					$("input.check_edit").bind('change',function(){
+						var chk1 = $(this);
+						MyTable.checked(chk1,"index.html","notification_edit_value");
+					});
+				}
+				//$("#main_div").attr('disabled','enabled');
+			}
+		})
+	}
+
+}); 
+</script> 
+</#noparse>
+
+<div id="main_div">
+
+<form name="add" action="add_item.html?act=act_add_item" method="post">
+<button type="submit">Add Item</button>
+</form>
+
+<form name="adds" action="index.html?act=act_add_test_items" method="post">
+<button type="submit">Add Items(5)</button>
+</form>
+
+<div class="ajax-table" id="table-list">
+<table border=1>
+<tbody>
+<thead style="background-color:gray">
+<tr>
+<th><input type="checkbox" id="chkall" onclick="MyTable.check_all(this.form)"/>Id</th>
+<th>Title</th>
+<th>Description</th>
+<th>Disable</th>
+<th>Operation</th>
+</tr>
+</thead>
+
+<#list list as items>
+	<tr>
+	<td><input type="checkbox" id="chkall" />${items.id}</td>
+	<td class='td_edit' id='${items.id}' name='nt_title'>${items.title}</td>
+	<td class='td_edit' id='${items.id}' name='nt_description'><span>${items.description}</span></td>
+	<#if items.disable gt 0> 
+		<td><input class="check_edit" type="checkbox" id='${items.id}' name='disable' checked = "checked" /></td>
+	<#else>
+		<td><input class="check_edit" type="checkbox" id='${items.id}' name='disable' /></td>
+	</#if>
+	<td><a href="javascript:void(0)" onclick="delete_item(${items.id})">delete</a></td>
+	</tr>
+
+</#list>
+<#if page??>
+	<tr>
+		<td colspan=7>
+			<#include "page.html">
+		</td>
+	</tr>
+</#if>
+</tbody>
+</table>
+</div>
+
+<form enctype="multipart/form-data" action="index.html?act=upload" method="post">
+       <input name="myFile" type="file">
+       <input type="submit"value="上传文件">
+</form>
+
+</div>
+
+<#include "footer.html">

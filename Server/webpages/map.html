@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<style type="text/css">
+		body, html {width: 100%;height: 100%;margin:0;font-family:"微软雅黑";}
+		#allmap{width:100%;height:500px;}
+		p{margin-left:5px; font-size:14px;}
+	</style>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&&ak=6y00d6C97W6grLq8iNHHjWme"></script>
+	<script src="http://libs.baidu.com/jquery/1.9.0/jquery.js"></script>
+	<title>给多个点添加信息窗口</title>
+</head>
+<body>
+	<div id="allmap"></div>
+	<p>点击标注点，可查看由纯文本构成的简单型信息窗口</p>
+</body>
+</html>
+
+<script type="text/javascript">
+	// 百度地图API功能	
+	map = new BMap.Map("allmap");
+	map.centerAndZoom(new BMap.Point(116.417854,39.921988), 15);
+	
+	var sContent =
+		"<h4 style='margin:0 0 5px 0;padding:0.2em 0'>天安门</h4>" + 
+		"<img style='float:right;margin:4px' id='imgDemo' src='http://app.baidu.com/map/images/tiananmen.jpg' width='139' height='104' title='天安门'/>" + 
+		"<p style='margin:0;line-height:1.5;font-size:13px;text-indent:2em'>天安门坐落在中国北京市中心,故宫的南侧,与天安门广场隔长安街相望,是清朝皇城的大门...</p>" + 
+		"</div>";
+					
+	var adds = [
+		"北京市东城区王府井大街88号乐天银泰百货八层",
+		"北京市东城区东华门大街",
+		"北京市东城区正义路甲5号"
+		];
+	
+	var opts = {
+		width : 250,     // 信息窗口宽度
+		height: 204,     // 信息窗口高度
+		title : "信息窗口" , // 信息窗口标题
+		enableMessage:true//设置允许信息窗发送短息
+	};
+			   
+	var myGeo = new BMap.Geocoder();
+	for(var i=0;i<adds.length;i++){
+		myGeo.getPoint(adds[i], function(point){
+			if (point) {
+				var marker = new BMap.Marker(new BMap.Point(point.lng, point.lat));  // 创建标注
+				var content = sContent;
+				map.addOverlay(marker);               // 将标注添加到地图中
+				addClickHandler(content,marker);
+			}
+		}, "北京市");	
+	}
+	
+	function addClickHandler(content,marker){
+		marker.addEventListener("click",function(e){
+			openInfo(content,e)}
+		);
+	}
+	
+	function openInfo(content,e){
+		var p = e.target;
+		var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
+		var infoWindow = new BMap.InfoWindow(content,opts);  // 创建信息窗口对象 
+		map.openInfoWindow(infoWindow,point); //开启信息窗口
+	}
+</script>

@@ -1,0 +1,28 @@
+
+<!-- need include '<div class="ajax-table">" -->
+<script type="text/javascript">
+	var current = ${page.current};
+	var total_page = ${page.count};
+</script>
+
+<div id="turn-page">
+	当前总计 <span id="totalRecords">${total_records}</span>
+	个记录，分为 <span id="totalPages">${page.count}</span>
+	页，当前第 <span id="pageCurrent">${page.current}</span>
+	页，每页 <input type='text' size='5' id='pageSize' value="${page.offsets}" onkeypress="return changePageSize(event)" />
+	<span id="page-link">
+          <#noparse><a href="javascript:page_to_first()"></#noparse>第一页</a>
+          <#noparse><a href="javascript:page_to_previous()"></#noparse>前一页</a>
+          <#noparse><a href="javascript:page_to_next()"></#noparse>后一页</a>
+          <#noparse><a href="javascript:page_to_last()"></#noparse>最末页</a>
+          <select id="select-page" onchange="go_pages(this.value)">
+          	<#list 1..page.count as i>
+          		<#if i == page.current>
+          			<option value = "${i}" selected="${i}">${i}</option>
+          		<#else>
+            		<option value = "${i}">${i}</option>
+            	</#if>
+            </#list>
+          </select>
+    </span>
+</div>
