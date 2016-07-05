@@ -1,3 +1,7 @@
+/**
+ * Author: xiaozhao
+ */
+
 package exhi.net.utils;
 
 import java.beans.BeanInfo;
