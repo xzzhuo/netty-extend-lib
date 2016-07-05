@@ -7,5 +7,6 @@
 	<classpathentry kind="lib" path="libs/netty-all-4.0.33.Final.jar"/>
 	<classpathentry kind="lib" path="libs/freemarker.jar"/>
 	<classpathentry kind="lib" path="libs/mysql-connector-java-5.1.37-bin.jar"/>
+	<classpathentry kind="lib" path="libs/poi-3.13-20150929.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
