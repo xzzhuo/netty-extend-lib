@@ -16,7 +16,10 @@ import java.util.Map;
 public class TransferUtils {
 
 	/**
-     * transfer mapping data to object, must transfer all map data to object property, otherwise throw exception 
+     * transfer mapping data to object, 
+     * must transfer all map data to object property,
+     * otherwise throw exception
+     *  
      * @param map mapping data
      * @param object Object
      * @param format Data format
@@ -89,13 +92,21 @@ public class TransferUtils {
 						}
 						else
 						{
-							throw new Exception(property.getPropertyType().toString());
+							throw new TransferException(String.format("transfer Error: not support type of '%s'", 
+									property.getPropertyType().toString()));
 						}
+					}
+				}
+				else
+				{
+					if (!key.equals("class")) {
+						throw new TransferException(String.format("'%s' is not a property find in the %s",
+								key, object.getClass().getName()));
 					}
 				}
 			}
 		} catch (Exception e) {  
-			throw new TransferException("transferMap2Bean2 Error: " + e, e.getCause());
+			throw new TransferException("transfer Error: " + e, e.getCause());
 		}
 		
 		return object;
