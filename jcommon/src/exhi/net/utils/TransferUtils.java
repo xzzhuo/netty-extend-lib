@@ -8,7 +8,9 @@ import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.sql.Timestamp;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,54 +48,76 @@ public class TransferUtils {
 		
 		try {
 			BeanInfo beanInfo = Introspector.getBeanInfo(object.getClass());  
-			PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();  
+			PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
 		
 			for (PropertyDescriptor property : propertyDescriptors) {  
 				String key = property.getName();
-		
+				Method setter = property.getWriteMethod();
+				
+				if (setter == null)
+				{
+					continue;
+				}
+				
 				if (map.containsKey(key)) {
 					Object value = map.get(key);
-					Method setter = property.getWriteMethod();
-
-					if (property.getPropertyType().equals(value.getClass()))
+					
+					if (value != null)
 					{
-						setter.invoke(object, value);
-					}
-					else
-					{
-						String str = value.toString();
-						if (property.getPropertyType().equals(String.class))
+						if (property.getPropertyType().equals(value.getClass()))
 						{
-							setter.invoke(object, str);
+							setter.invoke(object, value);
 						}
-						else if (property.getPropertyType().equals(Date.class))
+						else if (property.getPropertyType().equals(Date.class) && value.getClass().equals(Timestamp.class))
 						{
+							String str = format.format(value);
 							setter.invoke(object, format.parse(str));
 						}
-						else if (property.getPropertyType().equals(char.class) || property.getPropertyType().equals(Character.class))
+						else if (property.getPropertyType().equals(Timestamp.class) && value.getClass().equals(Date.class))
 						{
-							setter.invoke(object, str.charAt(0));
-						}
-						else if (property.getPropertyType().equals(int.class) || property.getPropertyType().equals(Integer.class))
-						{
-							setter.invoke(object, Integer.parseInt(str));
-						}
-						else if (property.getPropertyType().equals(double.class) || property.getPropertyType().equals(Double.class))
-						{
-							setter.invoke(object, Double.parseDouble(str));
-						}
-						else if (property.getPropertyType().equals(long.class) || property.getPropertyType().equals(Long.class))
-						{
-							setter.invoke(object, Long.parseLong(str));
-						}
-						else if (property.getPropertyType().equals(short.class) || property.getPropertyType().equals(Short.class))
-						{
-							setter.invoke(object, Short.parseShort(str));
+							String str = format.format(value);
+							setter.invoke(object, Timestamp.valueOf(str));
 						}
 						else
 						{
-							throw new TransferException(String.format("transfer Error: not support type of '%s'", 
-									property.getPropertyType().toString()));
+							String str = value.toString();
+							if (property.getPropertyType().equals(String.class))
+							{
+								setter.invoke(object, str);
+							}
+							else if (property.getPropertyType().equals(Date.class))
+							{
+								setter.invoke(object, format.parse(str));
+							}
+							else if (property.getPropertyType().equals(Timestamp.class))
+							{
+								setter.invoke(object, Timestamp.valueOf(str));
+							}
+							else if (property.getPropertyType().equals(char.class) || property.getPropertyType().equals(Character.class))
+							{
+								setter.invoke(object, str.charAt(0));
+							}
+							else if (property.getPropertyType().equals(int.class) || property.getPropertyType().equals(Integer.class))
+							{
+								setter.invoke(object, Integer.parseInt(str));
+							}
+							else if (property.getPropertyType().equals(double.class) || property.getPropertyType().equals(Double.class))
+							{
+								setter.invoke(object, Double.parseDouble(str));
+							}
+							else if (property.getPropertyType().equals(long.class) || property.getPropertyType().equals(Long.class))
+							{
+								setter.invoke(object, Long.parseLong(str));
+							}
+							else if (property.getPropertyType().equals(short.class) || property.getPropertyType().equals(Short.class))
+							{
+								setter.invoke(object, Short.parseShort(str));
+							}
+							else
+							{
+								throw new TransferException(String.format("transfer Error: not support type of '%s'", 
+										property.getPropertyType().toString()));
+							}
 						}
 					}
 				}
@@ -122,7 +146,8 @@ public class TransferUtils {
 	public static <T> T transferMap2Bean(Map<String, Object> map, Class<T> classOfT)
 			throws TransferException {
 		
-		return transferMap2Bean(map, classOfT, DateFormat.getDateInstance(DateFormat.DEFAULT));
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		return transferMap2Bean(map, classOfT, df);
 	}
 
 	/**
