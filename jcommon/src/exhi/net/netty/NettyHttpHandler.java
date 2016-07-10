@@ -124,15 +124,17 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 
 		if (mHandshaker == null)
 		{
-			String exceptionMessage = cause.getMessage();
-			BFCLog.error(getChannelAddress(), exceptionMessage);
-
-			StackTraceElement []traceElement = cause.getStackTrace();
-			if (traceElement.length > 0)
+			if (cause instanceof NullPointerException)
 			{
-				exceptionMessage = String.format("Exception caught: %s (%s,%s,%d)",
-					cause.getMessage(), traceElement[0].getFileName(), traceElement[0].getMethodName(), traceElement[0].getLineNumber());
-				BFCLog.debug(getChannelAddress(), exceptionMessage);
+				if (cause.getStackTrace().length > 0)
+				{
+					StackTraceElement stack = cause.getStackTrace()[0];
+					BFCLog.error(getChannelAddress(), "Null pointer: " +  stack.toString());
+				}
+			}
+			else
+			{
+				BFCLog.error(getChannelAddress(), cause.getMessage());
 			}
 			
 			if (cause instanceof TooLongFrameException)
