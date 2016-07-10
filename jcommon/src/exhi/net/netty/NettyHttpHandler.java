@@ -76,6 +76,7 @@ import io.netty.util.CharsetUtil;
 
 class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 
+	private NetApplication mApplication = null;
 	private String mClient = null;
 	
 	private HttpRequest mRequest = null;
@@ -91,11 +92,13 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 	
     // WebSocket handshaker
     private WebSocketServerHandshaker mHandshaker = null;
-    private WebSocket mWebsocket = NetHttpHelper.instance().getWebsocket();
+    private WebSocket mWebsocket = null;
     
-	public NettyHttpHandler(String client)
+	public NettyHttpHandler(NetApplication app, String client)
 	{	
+		this.mApplication = app;
 		this.mClient = client;
+		this.mWebsocket = app.getHelper().getWebsocket();
 	}
 	
 	private String getChannelAddress()
@@ -121,7 +124,16 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 
 		if (mHandshaker == null)
 		{
-			BFCLog.error(getChannelAddress(), "Exception caught: " + cause.getMessage());
+			String exceptionMessage = cause.getMessage();
+			BFCLog.error(getChannelAddress(), exceptionMessage);
+
+			StackTraceElement []traceElement = cause.getStackTrace();
+			if (traceElement.length > 0)
+			{
+				exceptionMessage = String.format("Exception caught: %s (%s,%s,%d)",
+					cause.getMessage(), traceElement[0].getFileName(), traceElement[0].getMethodName(), traceElement[0].getLineNumber());
+				BFCLog.debug(getChannelAddress(), exceptionMessage);
+			}
 			
 			if (cause instanceof TooLongFrameException)
 			{
@@ -166,7 +178,8 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 			}
 			else
 			{
-				NetHttpHelper helper = NetHttpHelper.instance();
+				boolean result = false;
+				NetHttpHelper helper = mApplication.getHelper();
 	
 				if (helper != null)
 				{
@@ -180,7 +193,9 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 					
 					if (mNettyProcess != null)
 					{
+						mNettyProcess.setCharset(this.mApplication.getHelper().getConfig().getCharset());
 						this.handleHttpRequest(ctx, (HttpObject)msg);
+						result = true;
 					}
 					else
 					{
@@ -190,6 +205,11 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 				else
 				{
 					BFCLog.error(getChannelAddress(), "Not provider the http helper object");
+				}
+				
+				if (!result)
+				{
+					this.sendError(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR);
 				}
 			}
         }
@@ -245,7 +265,7 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 			BFCLog.debug(getChannelAddress(), "Require URI: " + uri);
 			BFCLog.debug(getChannelAddress(), "Method: " + method);
 			BFCLog.debug(getChannelAddress(), "Version: " + mRequest.getProtocolVersion().text());
-			BFCLog.debug(getChannelAddress(), "Charset: " + NetHttpHelper.instance().getConfig().getCharset().name());
+			BFCLog.debug(getChannelAddress(), "Charset: " + mApplication.getHelper().getConfig().getCharset().name());
 			
 			for (Entry<String, String> entry : mRequest.headers()) {
 				BFCLog.debug(getChannelAddress(), "Header: " + entry.getKey() + '=' + entry.getValue());
@@ -500,7 +520,7 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
         		
         		try {
         			File uploadFile = new File(fileUpload.getFilename());
-	        		File tempDir = new File(NetHttpHelper.instance().getConfig().getTempPath());
+	        		File tempDir = new File(mApplication.getHelper().getConfig().getTempPath());
 	        		
 	        		File tempFile = File.createTempFile("netup_", "_"+uploadFile.getName(), tempDir);
 	        		fileUpload.renameTo(tempFile);
@@ -541,11 +561,20 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 			return;
 		}
 		
-		INetConfig config = NetHttpHelper.instance().getConfig();
+		INetConfig config = mApplication.getHelper().getConfig();
 		String charset = NetUtils.adapterContentCharset(config.getCharset());
 		
 		// Call inner process
-		NettyResult nettyResult = this.mNettyProcess.innerProcess(getChannelAddress(), uri, cookies, files, request, charset);
+		ProcessAdapter processAdapter = new ProcessAdapter();
+		processAdapter.setCharset(charset);
+		processAdapter.setClient(this.getChannelAddress());
+		processAdapter.setCookies(cookies);
+		processAdapter.setFiles(files);
+		processAdapter.setRequest(request);
+		processAdapter.setRootPath(config.getRootPath());
+		processAdapter.setServerType(config.getServerType());
+		processAdapter.setUri(uri);
+		NettyResult nettyResult = this.mNettyProcess.innerProcess(processAdapter);
 		
 		if (nettyResult == null)
 		{

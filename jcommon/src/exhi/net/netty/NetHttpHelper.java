@@ -9,20 +9,13 @@ import exhi.net.interface1.INetConfig;
 //private class, use by library
 class NetHttpHelper {
 
-	private static NetHttpHelper mHttpHelper = new NetHttpHelper();
-
 	private NetProcess mWebProcess = null;
 	private INetConfig mConfig = null;
 	private WebSocket mWebsocket = null;
 	
-	private NetHttpHelper()
+	public NetHttpHelper()
 	{
 		
-	}
-
-	public static NetHttpHelper instance()
-	{
-		return NetHttpHelper.mHttpHelper;
 	}
 	
 	public void setProcess(NetProcess process)

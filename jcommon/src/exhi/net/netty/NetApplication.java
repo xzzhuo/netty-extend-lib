@@ -11,7 +11,27 @@ import exhi.net.utils.NetUtils;
 
 public abstract class NetApplication implements INetApplication {
 
-	private NetHttpHelper mWebHelper = NetHttpHelper.instance();
+	private NetHttpHelper mHttpHelper = new NetHttpHelper();
+	
+	public NetApplication()
+	{
+		
+	}
+	
+	public NetApplication(INetConfig config)
+	{
+		mHttpHelper.setConfig(config);
+	}
+
+	public INetConfig getConfig()
+	{
+		return this.mHttpHelper.getConfig();
+	}
+	
+	public NetHttpHelper getHelper()
+	{
+		return this.mHttpHelper;
+	}
 	
 	private static String getDictionaryString(byte[] index)
     {
@@ -45,7 +65,7 @@ public abstract class NetApplication implements INetApplication {
 	{
 		String appName = this.getClass().getName();
 		byte[] ps = {-35, 6, 56, -3, 127, 36, 79, -28, 8, 76};
-		
+
 		if (!NetUtils.computeMd5(String.format("%s%s", appName, getDictionaryString(ps))).equals(apiKey))
 		{
 			BFCLog.error(NetConstant.System, "Api key is incorrect");
@@ -60,7 +80,7 @@ public abstract class NetApplication implements INetApplication {
 		BFCLog.info(NetConstant.System, "------------------------------------", true);
 		
 		NetProcess p = this.onGetProcess();
-		mWebHelper.setProcess(p);
+		getHelper().setProcess(p);
 		if (p == null)
 		{
 			BFCLog.error(NetConstant.System, "No process");
@@ -69,12 +89,19 @@ public abstract class NetApplication implements INetApplication {
 		INetConfig config = this.onGetConfig();
 		if (null == config)
 		{
+			config = this.mHttpHelper.getConfig();
+		}
+		
+		if (null == config)
+		{
 			BFCLog.warning(NetConstant.System, "Not set config, will use default");
 			config = new NettyConfig();
 		}
 		
 		try
 		{
+			getHelper().setConfig(config);
+			
 			this.onInit();
 			
 			String tempPath = config.getTempPath();
@@ -89,9 +116,7 @@ public abstract class NetApplication implements INetApplication {
 			// ignore make directory
 			BFCLog.warning(NetConstant.System, "Create temp directory failed: " + e.getMessage());
 		}
-		
-		mWebHelper.setConfig(config);
-		
+
 		BFCLog.info(NetConstant.System, "Port: " + config.getServerPort());
 		BFCLog.info(NetConstant.System, "Charset: " + config.getCharset());
 		BFCLog.info(NetConstant.System, "Root: " + config.getRootPath());
@@ -107,7 +132,7 @@ public abstract class NetApplication implements INetApplication {
 			
 			this.onStart();
 			
-			new NettyServer().start(config.getServerPort());
+			new NettyServer().start(this, config.getServerPort());
 		}
 		catch (InterruptedException e)
 		{
@@ -128,12 +153,12 @@ public abstract class NetApplication implements INetApplication {
 	 */
 	public void registerWebsocket(WebSocket websocket)
 	{
-		mWebHelper.setWebsocket(websocket);
+		getHelper().setWebsocket(websocket);
 	}
 	
 	WebSocket getWebsocketObject()
 	{
-		return mWebHelper.getWebsocket();
+		return getHelper().getWebsocket();
 	}
 	
 	@Override

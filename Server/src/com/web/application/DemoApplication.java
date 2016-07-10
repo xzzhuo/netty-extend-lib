@@ -13,18 +13,18 @@ public class DemoApplication extends NetApplication {
 		return new DemoProcess();
 	}
 
-	@Override
-	public INetConfig onGetConfig() {
-		return Config.instance();
-	}
-
 	public static void main(String[] args)
 	{
 		DemoApplication app = new DemoApplication();
-		
+
 		app.setDebugMode(true);
 		Config.instance().readConfig();
 		
 		app.run(args, "E7B8D64FCB9F125168BA223BC8DFAF1B");
+	}
+
+	@Override
+	public INetConfig onGetConfig() {
+		return Config.instance();
 	}
 }

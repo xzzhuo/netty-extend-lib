@@ -19,43 +19,52 @@ import freemarker.template.TemplateException;
 public class WebUtil {
 
 	private NetProcess mProcess = null;
+	private NetCharset mCharset = NetCharset.UTF_8;
 	private Map<String, Object> mParam = new HashMap<String, Object>();
 	private String mTemplatePath = ".";
 	
 	public WebUtil(NetProcess process)
 	{
-		mProcess = process;
-		mTemplatePath = System.getProperty("user.dir");
+		this.mProcess = process;
+		this.mCharset = process.getCharset();
+		this.mTemplatePath = System.getProperty("user.dir");
+	}
+	
+	public WebUtil(NetProcess process, NetCharset charset)
+	{
+		this.mProcess = process;
+		this.mCharset = charset;
+		this.mTemplatePath = System.getProperty("user.dir");
 	}
 	
 	public void setTemplatePath(String path)
 	{
-		mTemplatePath = path;
+		this.mTemplatePath = path;
 	}
 	
 	public void assign(String key, Object value)
 	{
-		mParam.put(key, value);
+		this.mParam.put(key, value);
 	}
 	
 	public void display(String name)
 	{
-		NetCharset charset = NetHttpHelper.instance().getConfig().getCharset();
+		NetCharset charset = this.mCharset;
 		try {
 			@SuppressWarnings("deprecation")
 			Configuration cfg = new Configuration();
-			cfg.setDirectoryForTemplateLoading(new File(mTemplatePath));
+			cfg.setDirectoryForTemplateLoading(new File(this.mTemplatePath));
 			Template template = cfg.getTemplate(name, NetUtils.adapterContentCharset(charset));
 			
 			StringWriter sw = new StringWriter();
-			template.process(mParam, sw);
+			template.process(this.mParam, sw);
 			sw.flush();
-			mProcess.setResponseText(new StringBuilder(sw.getBuffer()));
+			this.mProcess.setResponseText(new StringBuilder(sw.getBuffer()));
 		} catch (TemplateException e) {
-			mProcess.setResponseText(new StringBuilder(e.getMessage()));
+			this.mProcess.setResponseText(new StringBuilder(e.getMessage()));
 			e.printStackTrace();
 		} catch (IOException e) {
-			mProcess.setResponseText(new StringBuilder(e.getMessage()));
+			this.mProcess.setResponseText(new StringBuilder(e.getMessage()));
 			e.printStackTrace();
 		}
 	}

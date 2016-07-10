@@ -12,9 +12,9 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import exhi.net.constant.NetConstant;
+import exhi.net.interface1.NetCharset;
 import exhi.net.interface1.ServerType;
 import exhi.net.log.BFCLog;
 import exhi.net.netty.NettyResult.ReturnType;
@@ -30,7 +30,8 @@ public abstract class NetProcess {
 	private Map<String, Cookie> mUpCookies = new HashMap<String, Cookie>();
 	private String mUri = "";
 	private boolean bIsNotImplement404Callback = false;
-	
+	private NetCharset mCharset = NetCharset.UTF_8;
+
 	/**
 	 * Http request process
 	 * @param client client address
@@ -142,23 +143,25 @@ public abstract class NetProcess {
 	 * @param charset charset
 	 * @return return the NettyResult object
 	 */
-	NettyResult innerProcess(String client, String uri, Set<Cookie> cookies, Map<String, NetFile> files,
-			Map<String, String> request, String charset)
+	NettyResult innerProcess(ProcessAdapter processAdapter)
 	{
+		String client = processAdapter.getClient();
+		String uri = processAdapter.getUri();
+		
 		this.setUri(uri);
 		
-		if (files == null)
+		if (processAdapter.getFiles() == null)
 		{
 			mNetFiles = new HashMap<String, NetFile>();
 		}
 		else
 		{
-			mNetFiles = files;
+			mNetFiles = processAdapter.getFiles();
 		}
 
 		// move cookies
 		mDownCookies = new HashMap<String, Cookie>();
-		for (Cookie cookie : cookies)
+		for (Cookie cookie : processAdapter.getCookies())
 		{
 			// MyLog.debug("NetProcess", String.format("%s=%s", cookie.getName(),cookie.getValue()));
 			mDownCookies.put(cookie.name(), cookie);
@@ -172,9 +175,9 @@ public abstract class NetProcess {
 		
 		BFCLog.debug(client, "user dir = " + SystemPropertyUtil.get("user.dir"));
 		
-		if (NetHttpHelper.instance().getConfig().getServerType() == ServerType.WEB_SERVER)
+		if (processAdapter.getServerType() == ServerType.WEB_SERVER)
 		{
-			String path = NetUtils.getAbsoluteUrl(NetHttpHelper.instance().getConfig().getRootPath(), uri);
+			String path = NetUtils.getAbsoluteUrl(processAdapter.getRootPath(), uri);
 			File p = new File(path);
 			if (!p.exists())
 			{
@@ -228,7 +231,7 @@ public abstract class NetProcess {
 						result.setMimeType(mimeType);
 						if (type[1].trim().equals("html"))
 						{
-							this.onProcess(client, p.getAbsolutePath(), request);
+							this.onProcess(client, p.getAbsolutePath(), processAdapter.getRequest());
 							result.setText(this.getResponseText());
 						}
 						else
@@ -236,7 +239,8 @@ public abstract class NetProcess {
 							StringBuilder text = null;
 							
 							try {
-								text = NetUtils.readText(p.getAbsolutePath(), charset);
+								// read source files from disk
+								text = NetUtils.readText(p.getAbsolutePath(), processAdapter.getCharset());
 							} catch (Exception e) {
 								text = new StringBuilder();
 								BFCLog.error(NetConstant.System, "Error: " + e.getMessage(), true); 
@@ -266,9 +270,9 @@ public abstract class NetProcess {
 				result.setFilePath(p.getAbsolutePath());
 			}
 		}
-		else if (NetHttpHelper.instance().getConfig().getServerType() == ServerType.COMMAND)
+		else if (processAdapter.getServerType() == ServerType.COMMAND)
 		{
-			this.onProcess(client, uri, request);
+			this.onProcess(client, uri, processAdapter.getRequest());
 			result.setText(this.getResponseText());
 		}
 		
@@ -368,5 +372,14 @@ public abstract class NetProcess {
 	Map<String, Cookie> getCookies()
 	{
 		return this.mUpCookies;
+	}
+
+	void setCharset(NetCharset charset)
+	{
+		this.mCharset = charset;
+	}
+	
+	public NetCharset getCharset() {
+		return this.mCharset;
 	}
 }

@@ -19,7 +19,7 @@ class NettyServer {
 	
 	public final boolean isSSL = true;
 	
-	public void start(int port) throws InterruptedException
+	public void start(NetApplication app, int port) throws InterruptedException
 	{
 		ServerBootstrap b = new ServerBootstrap();
 		EventLoopGroup groupParent = new NioEventLoopGroup(1);
@@ -30,7 +30,7 @@ class NettyServer {
 			b.group(groupParent, groupChild);
 			b.channel(NioServerSocketChannel.class);
 			b.localAddress(new InetSocketAddress(port));
-			b.childHandler(new NettyInitializer());
+			b.childHandler(new NettyInitializer(app));
 			
 			ChannelFuture f = b.bind().sync();
 			BFCLog.info(NetConstant.System, "Started and listen on " + f.channel().localAddress(), true);

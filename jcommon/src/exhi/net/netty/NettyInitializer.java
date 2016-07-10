@@ -14,6 +14,13 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 
 class NettyInitializer extends ChannelInitializer<SocketChannel> {
 
+	private NetApplication mApplication = null;
+	
+	public NettyInitializer(NetApplication app)
+	{
+		this.mApplication = app;
+	}
+	
 	@Override
 	protected void initChannel(SocketChannel ch) throws Exception {
 
@@ -24,7 +31,7 @@ class NettyInitializer extends ChannelInitializer<SocketChannel> {
         //ch.pipeline().addLast(new HttpServerCodec());
         ch.pipeline().addLast(new HttpObjectAggregator(1024*10240));
         ch.pipeline().addLast(new ChunkedWriteHandler()); 
-		ch.pipeline().addLast("NettyHttpHandler", new NettyHttpHandler(getChannelAddress(ch)));
+		ch.pipeline().addLast("NettyHttpHandler", new NettyHttpHandler(this.mApplication, getChannelAddress(ch)));
 		
 		BFCLog.debug(getChannelAddress(ch), "Leave NettyInitializer@initChannel()");
 	}
