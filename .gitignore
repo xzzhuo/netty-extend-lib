@@ -9,6 +9,7 @@ temp/
 upload/
 logs/
 bin/
+doc/
 
 # Package Files #
 *.war
