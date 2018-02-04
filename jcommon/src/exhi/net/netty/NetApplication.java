@@ -9,26 +9,50 @@ import exhi.net.log.BFCLog;
 import exhi.net.log.NetLog;
 import exhi.net.utils.NetUtils;
 
+/**
+ * Application object, used to construct a new application instance
+ * @author XiaoZhao
+ *
+ */
 public abstract class NetApplication implements INetApplication {
 
 	private NetHttpHelper mHttpHelper = new NetHttpHelper();
 	
+	/**
+	 * The constructor of NetApplication class
+	 */
 	public NetApplication()
 	{
 		
 	}
 	
+	/**
+	 * The constructor of NetApplication class
+	 * @param config INetConfig type parameter
+	 * @see INetConfig
+	 *
+	 */
 	public NetApplication(INetConfig config)
 	{
 		mHttpHelper.setConfig(config);
 	}
 
+	/**
+	 * Get the configure parameter
+	 * @return return a INetConfig type parameter
+	 * @see INetConfig
+	 */
 	public INetConfig getConfig()
 	{
 		return this.mHttpHelper.getConfig();
 	}
 	
-	public NetHttpHelper getHelper()
+	/**
+	 * Get the NetHttpHelper object
+	 * @return return a NetHttpHelper type parameter
+	 * @see NetHttpHelper
+	 */
+	NetHttpHelper getHelper()
 	{
 		return this.mHttpHelper;
 	}
@@ -61,6 +85,11 @@ public abstract class NetApplication implements INetApplication {
     	return value;
     }
 	
+	/**
+	 * Run the application
+	 * @param args Command line arguments
+	 * @param apiKey Api Key
+	 */
 	public void run(String[] args, String apiKey)
 	{
 		String appName = this.getClass().getName();
@@ -75,6 +104,9 @@ public abstract class NetApplication implements INetApplication {
 		this.initialize();
 	}
 	
+	/**
+	 * Initialize configure, and start Netty Server
+	 */
 	private void initialize()
 	{
 		BFCLog.info(NetConstant.System, "------------------------------------", true);
@@ -142,6 +174,10 @@ public abstract class NetApplication implements INetApplication {
 		this.onStop();
 	}
 
+	/**
+	 * Set debug mode, if start a server run with debug mode, it will allow output debug log, or it will output debug log
+	 * @param debugMode if give the true value, start a server run with debug mode, or run with none debug mode
+	 */
 	public void setDebugMode(boolean debugMode)
 	{
 		BFCLog.setDebugMode(debugMode);
@@ -150,29 +186,44 @@ public abstract class NetApplication implements INetApplication {
 	/**
 	 * Register websocket handler process
 	 * @param websocket Websocket handler class
+	 * @see WebSocket
 	 */
 	public void registerWebsocket(WebSocket websocket)
 	{
 		getHelper().setWebsocket(websocket);
 	}
 	
+	/**
+	 * Return Websocket Object
+	 * @return reutrn a websocket object
+	 * @see WebSocket
+	 */
 	WebSocket getWebsocketObject()
 	{
 		return getHelper().getWebsocket();
 	}
 	
+	/**
+	 * Do something after configuration but before starting service
+	 */
 	@Override
 	public void onInit()
 	{
 		
 	}
 	
+	/**
+	 * Do something before starting service
+	 */
 	@Override
 	public void onStart()
 	{
 		
 	}
 	
+	/**
+	 * Do something after stop service
+	 */
 	@Override
 	public void onStop()
 	{

@@ -18,6 +18,11 @@ import java.util.Map;
 import exhi.net.constant.NetConstant;
 import exhi.net.log.BFCLog;
 
+/**
+ * Database engineer
+ * @author XiaoZhao
+ *
+ */
 public class NetDatabase {
 
 	private static final String DB_DRIVER = "com.mysql.jdbc.Driver";
@@ -26,12 +31,21 @@ public class NetDatabase {
 	
 	private Connection mConnect = null;
 
+	/**
+	 * The constructor of NetDatabase class, use for database manage
+	 */
 	public NetDatabase()
 	{
 		
 	}
 	
-	// String.Format("jdbc:mysql://%s:%d/%s", url, port, database);
+	/**
+	 * Connect the database with new database parameter
+	 * eg: String.Format("jdbc:mysql://%s:%d/%s", url, port, database);
+	 * @param param the database parameter
+	 * @return Connect success return true, or return false
+	 * @see DatabaseParam
+	 */
 	public boolean connect(DatabaseParam param)
 	{
 		boolean result = false;
@@ -71,6 +85,9 @@ public class NetDatabase {
 		return result;
 	}
 	
+	/**
+	 * Disconnect the current database
+	 */
 	public void disconnect()
 	{
 		try {
@@ -84,8 +101,10 @@ public class NetDatabase {
 		}
 	}
 	
-	/*
-	 * Create table
+	/**
+	 * Create a new table
+	 * @param sql The parameter of sql statement
+	 * @return Create success return true, or return false
 	 */
 	public boolean createTable(String sql)
 	{
@@ -124,11 +143,13 @@ public class NetDatabase {
 		return result;
 	}
 	
-	/*
-	 * Execute update
+	/**
+	 * * Execute update
 	 * 
 	 * Executes the given SQL statement, which may be an INSERT, UPDATE, 
 	 * or DELETE statement or an SQL statement that returns nothing, such as an SQL DDL statement
+	 * @param sql The parameter of sql statement
+	 * @return Update success return true, or return false
 	 */
 	public boolean executeUpdate(String sql)
 	{
@@ -180,9 +201,11 @@ public class NetDatabase {
         return map;  
 	} 
 	
-	/*
+	/**
 	 * Query records
 	 * eg: SELECT * FROM table
+	 * @param sql The parameter of sql statement
+	 * @return return the list of mapping data
 	 */
 	public List<Map<String, Object>> query(String sql)
 	{
@@ -322,8 +345,9 @@ public class NetDatabase {
 		return result;
 	}
 	
-	/*
-	 * Get database version, eg: "5.7.9"
+	/**
+	 * Get database engineer version, eg: "5.7.9"
+	 * @return return database engineer version
 	 */
 	public String getDatabaseVersion()
 	{

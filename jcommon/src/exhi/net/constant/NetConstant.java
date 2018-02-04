@@ -4,6 +4,11 @@
 
 package exhi.net.constant;
 
+/**
+ * Constant name
+ * @author XiaoZhao
+ *
+ */
 public class NetConstant {
 	public static final String System = "System";
 	public static final String Database = "Database";

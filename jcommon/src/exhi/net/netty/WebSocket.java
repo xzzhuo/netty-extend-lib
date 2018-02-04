@@ -23,11 +23,19 @@ public abstract class WebSocket implements IWebSocket {
 	private List<Channel> mChannelList = new ArrayList<Channel>();
 	private String mAddress = "";
 	
+	/**
+	 * The constructor of WebSocket class
+	 * @param address Websocket address, The full address is ws://[ip:port]/[address]
+	 */
 	public WebSocket(String address)
 	{
 		this.mAddress = address;
 	}
 	
+	/**
+	 * Get current Websocket address
+	 * @return
+	 */
 	public String getAddress()
 	{
 		return this.mAddress;

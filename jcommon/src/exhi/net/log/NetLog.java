@@ -16,6 +16,13 @@ import java.util.Date;
 
 import exhi.net.interface1.LogLevel;
 
+/**
+ * Log output, common class
+ * The net log use double buffer machining, if file1 is get to max size and will delete file2 which exist and change to output to file2,
+ * and then file2 is get to max size, it will delete file1 and return to output to file1, and keep going around this way.
+ * @author XiaoZhao
+ *
+ */
 public class NetLog {
 	private static final String mPath 	= "logs";
 	
@@ -27,6 +34,10 @@ public class NetLog {
 	
 	private static LogLevel mLogLevel 	= LogLevel.Debug;
 	
+	/**
+	 * Set log level
+	 * @param level log level
+	 */
 	public static void setLevel(LogLevel level)
 	{
 		if (level == null)
@@ -37,6 +48,10 @@ public class NetLog {
 		mLogLevel = level;
 	}
 	
+	/**
+	 * Set max tag length
+	 * @param length new tag length
+	 */
 	public static void setMaxTagLen(int length)
 	{
 		if (length < mMinTagLen)
@@ -47,6 +62,10 @@ public class NetLog {
 		mLimitTagLen = length;
 	}
 	
+	/**
+	 * Set log file name
+	 * @param name The log file name
+	 */
 	public static void setLogFileName(String name)
 	{
 		if (name != null && !name.isEmpty())
@@ -55,6 +74,10 @@ public class NetLog {
 		}
 	}
 	
+	/**
+	 * Out the log message to file
+	 * @param message The log message
+	 */
 	private static synchronized void output(String message)
 	{
 		File path = new File(mPath);
@@ -114,6 +137,13 @@ public class NetLog {
 		}
 	}
 	
+	/**
+	 * Format the tag and output the message with log level
+	 * @param tag The tag information
+	 * @param level The log level
+	 * @param message The log message
+	 * @return
+	 */
 	private static String LevelOutput(String tag, LogLevel level, String message)
 	{
 		// date, level, tag, message
@@ -134,6 +164,12 @@ public class NetLog {
 		return test; 
 	}
 	
+	/**
+	 * Output information level log
+	 * @param tag The tag
+	 * @param message The message
+	 * @param trace Output trace flag, true meanwhile output trace, or not output trace
+	 */
 	public static void info(String tag, String message, boolean trace)
 	{
 		if (mLogLevel.ordinal() > LogLevel.Info.ordinal())
@@ -151,6 +187,11 @@ public class NetLog {
 		}
 	}
 	
+	/**
+	 * Output information level log
+	 * @param tag The tag
+	 * @param message The message
+	 */
 	public static void info(String tag, String message)
 	{
 		if (mLogLevel.ordinal() > LogLevel.Info.ordinal())
@@ -162,6 +203,12 @@ public class NetLog {
 		NetTrace.info(test);
 	}
 	
+	/**
+	 * Output error level log
+	 * @param tag The tag
+	 * @param message The message
+	 * @param trace Output trace flag, true meanwhile output trace, or not output trace
+	 */
 	public static void error(String tag, String message, boolean trace)
 	{
 		if (mLogLevel.ordinal() > LogLevel.Error.ordinal())
@@ -179,6 +226,11 @@ public class NetLog {
 		}
 	}
 	
+	/**
+	 * Output error level log
+	 * @param tag The tag
+	 * @param message The message
+	 */
 	public static void error(String tag, String message)
 	{
 		if (mLogLevel.ordinal() > LogLevel.Error.ordinal())
@@ -190,6 +242,12 @@ public class NetLog {
 		NetTrace.error(test);
 	}
 	
+	/**
+	 * Output debug level log
+	 * @param tag The tag
+	 * @param message The message
+	 * @param trace Output trace flag, true meanwhile output trace, or not output trace
+	 */
 	public static void debug(String tag, String message, boolean trace)
 	{
 		if (mLogLevel.ordinal() > LogLevel.Debug.ordinal())
@@ -207,6 +265,11 @@ public class NetLog {
 		}
 	}
 	
+	/**
+	 * Output debug level log
+	 * @param tag The tag
+	 * @param message The message
+	 */
 	public static void debug(String tag, String message)
 	{
 		if (mLogLevel.ordinal() > LogLevel.Debug.ordinal())
@@ -218,6 +281,12 @@ public class NetLog {
 		NetTrace.debug(test);
 	}
 	
+	/**
+	 * Output warning level log
+	 * @param tag The tag
+	 * @param message The message
+	 * @param trace Output trace flag, true meanwhile output trace, or not output trace
+	 */
 	public static void warning(String tag, String message, boolean trace)
 	{
 		if (mLogLevel.ordinal() > LogLevel.Warning.ordinal())
@@ -235,6 +304,11 @@ public class NetLog {
 		}
 	}
 	
+	/**
+	 * Output warning level log
+	 * @param tag The tag
+	 * @param message The message
+	 */
 	public static void warning(String tag, String message)
 	{
 		if (mLogLevel.ordinal() > LogLevel.Warning.ordinal())
@@ -246,6 +320,12 @@ public class NetLog {
 		NetTrace.warning(test);
 	}
 	
+	/**
+	 * Output fatal level log
+	 * @param tag The tag
+	 * @param message The message
+	 * @param trace Output trace flag, true meanwhile output trace, or not output trace
+	 */
 	public static void fatal(String tag, String message, boolean trace)
 	{
 		if (mLogLevel.ordinal() > LogLevel.Fatal.ordinal())
@@ -263,6 +343,11 @@ public class NetLog {
 		}
 	}
 	
+	/**
+	 * Output fatal level log
+	 * @param tag The tag
+	 * @param message The message
+	 */
 	public static void fatal(String tag, String message)
 	{
 		if (mLogLevel.ordinal() > LogLevel.Fatal.ordinal())
@@ -274,6 +359,10 @@ public class NetLog {
 		NetTrace.fatal(test);
 	}
 
+	/**
+	 * Get current log file index
+	 * @return Return the current log file index
+	 */
 	public static int getCurrentIndex() {
 		return mCurrentIndex;
 	}

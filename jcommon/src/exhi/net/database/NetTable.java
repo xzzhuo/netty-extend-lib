@@ -11,6 +11,11 @@ import java.util.Map;
 import exhi.net.constant.NetConstant;
 import exhi.net.log.BFCLog;
 
+/**
+ * Table manage of database
+ * @author XiaoZhao
+ *
+ */
 public abstract class NetTable implements INetTable {
 
 	private DatabaseParam mParam = null;
@@ -19,11 +24,15 @@ public abstract class NetTable implements INetTable {
 	protected int mVersion = 1;
 	private NetDatabase mDatabase = null;
 	private int mTakeOver = 0;
-	
+
 	/**
-	 * Structure a new net table with parameter and version
+	 * Structure a new net table with parameter and version, if old version not equal version, it will automatic upgrade the database,
+	 * eg: tableName=table, oldVersion=1, version=2, if exist table1 and table2 is empty, it will copy table1 filed to table2 if table2 exist that filed
 	 * @param param database parameter
-	 * @param version database version, now not use
+	 * @param tableName input table name
+	 * @param oldVersion old database version
+	 * @param version database version
+	 * @see DatabaseParam
 	 */
 	public NetTable(DatabaseParam param, String tableName, int oldVersion, int version)
 	{
@@ -33,10 +42,11 @@ public abstract class NetTable implements INetTable {
 		this.mOldVersion 	= oldVersion;
 		this.mVersion 		= version;
 	}
-	
+
 	/**
 	 * Upgrade table old version to new version
-	 * @return return true if upgrade success, or return false
+	 * @param fields The fields of target table
+	 * @return Return true if upgrade success, or return false
 	 */
 	private boolean UpgradeTable(List<String> fields)
 	{
@@ -53,7 +63,8 @@ public abstract class NetTable implements INetTable {
 	
 	/**
 	 * Get the new table name with version
-	 * @return return the table name with version
+	 * formater: String.format("%s%d", this.mTableName, this.mVersion)
+	 * @return return the table name with version, eg: table name is table, version is 1, then return table1
 	 */
 	public String getTableName()
 	{
@@ -117,6 +128,9 @@ public abstract class NetTable implements INetTable {
 		return mDatabase;
 	}
 
+	/**
+	 * Disconnect the database
+	 */
 	private void Disconnect()
 	{
 		mTakeOver--;
@@ -132,7 +146,7 @@ public abstract class NetTable implements INetTable {
 	/**
 	 * Executes the given SQL statement, which returns all set value.
 	 * @param sql SQL statement
-	 * @return return all set value
+	 * @return Return all set value
 	 */
 	public List<Map<String, Object>> query(String sql)
 	{
@@ -182,8 +196,8 @@ public abstract class NetTable implements INetTable {
 	
 	/**
 	 * Executes the given SQL statement, which insert new set value.
-	 * @param sql SQL statement
-	 * @return if insert new set value return success, or return false.
+	 * @param sql The parameter of sql statement
+	 * @return Insert success return true, or return false
 	 */
 	public boolean insert(String sql)
 	{
@@ -199,6 +213,11 @@ public abstract class NetTable implements INetTable {
 		return retval;
 	}
 
+	/**
+	 * Executes the given SQL statement, which update database.
+	 * @param sql The parameter of sql statement
+	 * @return Update success return true, or return false
+	 */
 	public boolean update(String sql)
 	{
 		NetDatabase db = this.getEnableDatabase();
@@ -213,6 +232,11 @@ public abstract class NetTable implements INetTable {
 		return retval;
 	}
 	
+	/**
+	 * Execute delete Executes the given SQL statement. 
+	 * @param sql The parameter of sql statement
+	 * @return Delete success return true, or return false
+	 */
 	public boolean delete(String sql)
 	{
 		NetDatabase db = this.getEnableDatabase();
@@ -243,7 +267,7 @@ public abstract class NetTable implements INetTable {
 	{
 		this.Disconnect();
 	}
-	
+
 	protected void finalize()
 	{
 		if (mDatabase != null)
@@ -257,14 +281,19 @@ public abstract class NetTable implements INetTable {
 	}
 	
 	/**
-	 * get the count of all sets.
-	 * @return return the count of all sets
+	 * Get the count of all sets
+	 * @return return the field count of all sets
 	 */
 	public long getCount()
 	{
 		return getCount(this.getTableName());
 	}
 	
+	/**
+	 * Get the count of given the table
+	 * @param tableName The table name
+	 * @return return the filed count of given table name
+	 */
 	private long getCount(String tableName)
 	{
 		long result = 0;

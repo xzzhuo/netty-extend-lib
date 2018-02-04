@@ -4,6 +4,9 @@
 
 package exhi.net.database;
 
+/*
+ * The database configuration parameter
+ */
 public class DatabaseParam {
 
 	private String mUrl = "localhost";
@@ -12,34 +15,83 @@ public class DatabaseParam {
 	private String mUser = "root";
 	private String mPassword = "root";
 	
+	/**
+	 * get database url
+	 * @return return the database url
+	 */
 	public String getUrl() {
 		return mUrl;
 	}
-	public void setUrl(String mUrl) {
-		this.mUrl = mUrl;
+	
+	/**
+	 * update a new database url, default is "localhost"
+	 * @param url the new database url
+	 */
+	public void setUrl(String url) {
+		this.mUrl = url;
 	}
+	
+	/**
+	 * get database port
+	 * @return return the database port
+	 */
 	public int getPort() {
 		return mPort;
 	}
-	public void setPort(int mPort) {
-		this.mPort = mPort;
+	
+	/**
+	 * update a new database port, default is "3306"
+	 * @param port the new port
+	 */
+	public void setPort(int port) {
+		this.mPort = port;
 	}
+	
+	/**
+	 * get the database name
+	 * @return return the database name
+	 */
 	public String getDatabaseName() {
 		return mDatabaseName;
 	}
-	public void setDatabaseName(String mDatabaseName) {
-		this.mDatabaseName = mDatabaseName;
+	
+	/**
+	 * set a new database, default is "database"
+	 * @param databaseName the new database name
+	 */
+	public void setDatabaseName(String databaseName) {
+		this.mDatabaseName = databaseName;
 	}
+	
+	/**
+	 * get user name
+	 * @return return the user name
+	 */
 	public String getUser() {
 		return mUser;
 	}
-	public void setUser(String mUser) {
-		this.mUser = mUser;
+	
+	/**
+	 * update a new user name, default is "root"
+	 * @param user the new user name
+	 */
+	public void setUser(String user) {
+		this.mUser = user;
 	}
+	
+	/**
+	 * get password
+	 * @return return the password
+	 */
 	public String getPassword() {
 		return mPassword;
 	}
-	public void setPassword(String mPassword) {
-		this.mPassword = mPassword;
+	
+	/**
+	 * update a new password, default is "root"
+	 * @param password the new password
+	 */
+	public void setPassword(String password) {
+		this.mPassword = password;
 	}
 }
