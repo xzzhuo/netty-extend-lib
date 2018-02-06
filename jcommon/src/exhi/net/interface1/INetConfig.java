@@ -7,7 +7,7 @@ package exhi.net.interface1;
 /**
  * The configure interface of NetApplication
  * @author XiaoZhao
- * @see NetApplication
+ * @see exhi.net.netty.NetApplication
  *
  */
 public interface INetConfig {

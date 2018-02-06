@@ -24,7 +24,7 @@ public class BFCLog {
 	
 	/**
 	 * return the debug mode flag
-	 * @return
+	 * @return Return the debug mode flag
 	 */
 	public static boolean isDebugMode()
 	{

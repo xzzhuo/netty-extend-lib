@@ -29,13 +29,14 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 public class ExcelUtils {
 
 	/**
-     * 读取Excel的内容，第一维数组存储的是一行中格列的值，二维数组存储的是多少个行
-     * @param file 读取数据的源Excel
-     * @param ignoreRows 读取数据忽略的行数，比喻行头不需要读入 忽略的行数为1
-     * @return 读出的Excel中数据的内容
-     * @throws FileNotFoundException
-     * @throws IOException
-     */
+	 * 读取Excel的内容，第一维数组存储的是一行中格列的值，二维数组存储的是多少个行
+	 * @param file 读取数据的源Excel
+	 * @param sheetIndex The sheet index
+	 * @param ignoreRows 读取数据忽略的行数，比喻行头不需要读入 忽略的行数为1
+	 * @return 读出的Excel中数据的内容
+	 * @throws FileNotFoundException Signals that an attempt to open the file denoted by a specified pathname has failed.
+	 * @throws IOException Signals that an I/O exception of some sort has occurred. This class is the general class of exceptions produced by failed or interrupted I/O operations.
+	 */
 	public static String[][] importData(File file, int sheetIndex, int ignoreRows)
            throws FileNotFoundException, IOException {
        List<String[]> result = new ArrayList<String[]>();

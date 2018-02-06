@@ -252,7 +252,7 @@ public abstract class NetTable implements INetTable {
 	
 	/**
 	 * Make database keep connect status
-	 * @see releaseDatabase()
+	 * @see #releaseDatabase()
 	 */
 	public void holdDatabase()
 	{
@@ -261,7 +261,7 @@ public abstract class NetTable implements INetTable {
 	
 	/**
 	 * Disconnect database
-	 * @see holdDatabase()
+	 * @see #holdDatabase()
 	 */
 	public void releaseDatabase()
 	{

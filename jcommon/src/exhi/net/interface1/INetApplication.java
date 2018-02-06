@@ -30,13 +30,15 @@ public interface INetApplication {
 	
 	/**
 	 * Return a NetProcess type process object
-	 * @return
+	 * @return Return the NetProcess type process object for handle the http requests
+	 * @see NetProcess
 	 */
 	NetProcess onGetProcess();
 	
 	/**
 	 * Return a INetConfig type configuration object
-	 * @return
+	 * @return Return the INetConfig type configuration data for configure the http server
+	 * @see INetConfig
 	 */
 	INetConfig onGetConfig();
 }

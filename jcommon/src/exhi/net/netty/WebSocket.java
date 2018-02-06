@@ -34,7 +34,7 @@ public abstract class WebSocket implements IWebSocket {
 	
 	/**
 	 * Get current Websocket address
-	 * @return
+	 * @return Return the websocket address, eg: ws://[ip:port]/[address]
 	 */
 	public String getAddress()
 	{

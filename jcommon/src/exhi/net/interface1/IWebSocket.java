@@ -35,7 +35,7 @@ public interface IWebSocket {
 	/**
 	 * Trigger callback function for receive message
 	 * @param address The sebsokcet address
-	 * @param message The message
+	 * @param data The binary data
 	 */
 	void onMessage(SocketAddress address, byte[] data);
 }

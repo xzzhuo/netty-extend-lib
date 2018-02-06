@@ -18,16 +18,16 @@ import java.util.Map;
 public class TransferUtils {
 
 	/**
-     * transfer mapping data to object, 
+	 * transfer mapping data to object, 
      * must transfer all map data to object property,
      * otherwise throw exception
-     *  
-     * @param map mapping data
-     * @param object Object
-     * @param format Data format
-     * @return get a object
-	 * @throws TransferException 
-     */
+     * 
+	 * @param map mapping data
+	 * @param classOfT The type of class
+	 * @param format Data format
+	 * @return Return an object of T type
+	 * @throws TransferException Throw the exception when transfer failed.
+	 */
 	public static <T> T transferMap2Bean(Map<String, Object> map, Class<T> classOfT, DateFormat format)
 			throws TransferException {
 		
@@ -137,12 +137,12 @@ public class TransferUtils {
 	}
 
 	/**
-     * transfer mapping data to object, must transfer all map data to object property, otherwise throw exception 
-     * @param map mapping data
-     * @param object Object
-     * @return get a object
-	 * @throws TransferException 
-     */
+	 * Transfer mapping data to object, must transfer all map data to object property, otherwise throw exception
+	 * @param map mapping data
+	 * @param classOfT The type of class
+	 * @return Get an object
+	 * @throws TransferException Throw the exception when transfer failed.
+	 */
 	public static <T> T transferMap2Bean(Map<String, Object> map, Class<T> classOfT)
 			throws TransferException {
 		
@@ -151,12 +151,11 @@ public class TransferUtils {
 	}
 
 	/**
-     * transfer object to mapping data
-     * @param map mapping data
-     * @param object Object
-     * @return get a object
-	 * @throws TransferException 
-     */
+	 * Transfer object to mapping data
+	 * @param object Object
+	 * @return Get an object
+	 * @throws TransferException Throw the exception when transfer failed.
+	 */
 	public static Map<String, Object> transferBean2Map(Object object) throws TransferException {  
 		
 		if(object == null) {
