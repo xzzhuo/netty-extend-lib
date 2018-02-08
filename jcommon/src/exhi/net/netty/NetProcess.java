@@ -21,6 +21,12 @@ import exhi.net.netty.NettyResult.ReturnType;
 import exhi.net.utils.FileMimeMap;
 import exhi.net.utils.NetUtils;
 
+/**
+ * The class of NetProcess, handle the web request
+ * 
+ * @author XiaoZhao
+ *
+ */
 public abstract class NetProcess {
 
 	private StringBuilder mResponseText = new StringBuilder();
@@ -44,6 +50,10 @@ public abstract class NetProcess {
 		this.mUri = mUri;
 	}
 	
+	/**
+	 * Get the URI
+	 * @return Return current URI
+	 */
 	protected String getUri() {
 		return mUri;
 	}
@@ -59,11 +69,20 @@ public abstract class NetProcess {
 		}
 	}
 	
+	/**
+	 * Response the text value
+	 * @param value The text value
+	 */
 	protected void print(String value)
 	{
 		setResponseText(new StringBuilder(value));
 	}
 	
+	/**
+	 * Response the last value, after that, no other requests will be responded.
+	 * 
+	 * @param value The text value
+	 */
 	protected void die(String value)
 	{
 		if (mDeathResult != null)
@@ -78,6 +97,11 @@ public abstract class NetProcess {
 		mDeathResult.setText(sb);
 	}
 	
+	/**
+	 * locate to the special URL, after that, no other requests will be responded.
+	 * 
+	 * @param url The new URL
+	 */
 	protected void location(String url)
 	{
 		if (mDeathResult != null)
@@ -89,6 +113,11 @@ public abstract class NetProcess {
 		mDeathResult.setText(new StringBuilder(url));
 	}
 	
+	/**
+	 * Get net file
+	 * @param key The key of net file
+	 * @return Return the net file form upload
+	 */
 	protected NetFile getFile(String key)
 	{
 		if (this.mNetFiles.containsKey(key))
@@ -291,11 +320,20 @@ public abstract class NetProcess {
 		return result;
 	}
 	
+	/**
+	 * Get current work path
+	 * @return Return the current work path
+	 */
 	protected String getWorkPath()
 	{
 		return SystemPropertyUtil.get("user.dir");
 	}
 
+	/**
+	 * Get the cookie value with special key
+	 * @param key The key of cookie
+	 * @return Return the cookie value with special key
+	 */
 	protected String getCookie(String key) {
 		
 		String value = null;
@@ -311,6 +349,13 @@ public abstract class NetProcess {
 		return value;
 	}
 
+	/**
+	 * Creates a new cookie with the specified name and value.
+	 * This cookie will not expire.
+	 * 
+	 * @param key The key of cookie
+	 * @param value The value of cookie
+	 */
 	protected void setCookie(String key, String value) {
 		
 		String newValue = "";
@@ -323,8 +368,15 @@ public abstract class NetProcess {
 		this.mUpCookies.put(key, cookie);	// 用于保存新值
 		this.mDownCookies.put(key, cookie);	// 用于即时更新
 	}
-	
-	// expires: seconds
+
+	/**
+	 * Creates a new cookie with the specified name and value.
+	 * This cookie will expire after a given time.
+	 * 
+	 * @param key The key of cookie
+	 * @param value The value of cookie
+	 * @param expires The maximum age of this cookie in seconds
+	 */
 	protected void setCookie(String key, String value, long expires) {
 		
 		String newValue = "";
@@ -339,8 +391,16 @@ public abstract class NetProcess {
 		this.mUpCookies.put(key, cookie);	// 用于保存新值
 		this.mDownCookies.put(key, cookie);	// 用于即时更新
 	}
-	
-	// expires: seconds
+
+	/**
+	 * Creates a new cookie with the specified name and value.
+	 * This cookie will expire after a given time.
+	 * 
+	 * @param key The key of cookie
+	 * @param value The value of cookie
+	 * @param expires The maximum age of this cookie in seconds
+	 * @param path The path to use for this cookie
+	 */
 	protected void setCookie(String key, String value, long expires, String path) {
 		
 		String newValue = "";
@@ -359,7 +419,7 @@ public abstract class NetProcess {
 	
 	/**
 	 * Delete the cookie value by given key
-	 * @param key the key of cookie
+	 * @param key The key of cookie
 	 */
 	protected void deleteCookie(String key)
 	{
@@ -379,6 +439,10 @@ public abstract class NetProcess {
 		this.mCharset = charset;
 	}
 	
+	/**
+	 * Get current char set
+	 * @return Return current char set
+	 */
 	public NetCharset getCharset() {
 		return this.mCharset;
 	}
