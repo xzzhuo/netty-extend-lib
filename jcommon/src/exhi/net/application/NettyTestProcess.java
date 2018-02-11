@@ -1,10 +1,12 @@
-package exhi.net.netty;
+package exhi.net.application;
 
 import java.util.Map;
 
 import exhi.net.log.BFCLog;
+import exhi.net.netty.NetFile;
+import exhi.net.netty.NetProcess;
 
-class NettyTestProcess extends NetProcess {
+public final class NettyTestProcess extends NetProcess {
 
 	@Override
 	protected void onProcess(String client, String uri,
@@ -12,7 +14,7 @@ class NettyTestProcess extends NetProcess {
 		BFCLog.debug("Test", "uri = " + uri);
 		BFCLog.debug("Test", "request = " + request.toString());
 		
-		String html = "<html><head><title>netty-extend-lib</title></head><body>%s</body></html>";
+		String html = "<html><head><title>netty-extend-lib</title></head><body>%s%s</body></html>";
 		if (uri.contains("test"))
 		{
 			this.setCookie("name", "test", 60);
@@ -26,7 +28,14 @@ class NettyTestProcess extends NetProcess {
 		}
 		else if (uri.contains("file"))
 		{
-			this.print(String.format(html, "<p>upload file</p>"));
+			String tableFormat = "<table border='1'><tr><td>file name: %s</td><td>file type: %s</td><td>file size: %s</td></tr></table>";
+			String table = "";
+			NetFile nf = this.getFile("test_file");
+			if (nf != null) {
+				table = String.format(tableFormat, nf.name, nf.type, nf.size);
+			}
+			
+			this.print(String.format(html, "<p>test upload file, file size limit to 10M</p>", table));
 		}
 		else
 		{

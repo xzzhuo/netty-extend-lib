@@ -2,13 +2,16 @@
  * Author: xiaozhao
  */
 
-package exhi.net.netty;
+package exhi.net.application;
 
 import exhi.net.interface1.INetConfig;
 import exhi.net.log.BFCLog;
 import exhi.net.log.NetLog;
+import exhi.net.netty.NetApplication;
+import exhi.net.netty.NetProcess;
+import exhi.net.netty.NettyConfig;
 
-class NettyTestApp extends NetApplication {
+public final class NettyTestApp extends NetApplication {
 
 	NettyTestApp(INetConfig config)
 	{
@@ -34,7 +37,7 @@ class NettyTestApp extends NetApplication {
 			}
 		});
 
-		testApp.run(args, "14D39CD79FC46B2D7EEC6CFAB80858C7");
+		testApp.run(args, "EFBC12AF3407ACF5A425C653692D3F72");
 	}
 
 	@Override

@@ -29,7 +29,7 @@ class NettyInitializer extends ChannelInitializer<SocketChannel> {
 		ch.pipeline().addLast(new HttpResponseEncoder());
         ch.pipeline().addLast(new HttpRequestDecoder());
         //ch.pipeline().addLast(new HttpServerCodec());
-        ch.pipeline().addLast(new HttpObjectAggregator(1024*10240));
+        ch.pipeline().addLast(new HttpObjectAggregator(1024*10240));	// upload file limit size (10M)
         ch.pipeline().addLast(new ChunkedWriteHandler()); 
 		ch.pipeline().addLast("NettyHttpHandler", new NettyHttpHandler(this.mApplication, getChannelAddress(ch)));
 		

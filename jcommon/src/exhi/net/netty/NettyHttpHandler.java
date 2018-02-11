@@ -134,7 +134,7 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 			}
 			else
 			{
-				BFCLog.error(getChannelAddress(), cause.getMessage());
+				BFCLog.error(getChannelAddress(), "cause message: " + cause.getMessage());
 			}
 			
 			if (cause instanceof TooLongFrameException)
@@ -146,7 +146,7 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 			else
 			{
 				if (ctx.channel().isActive()) {  
-					this.sendError(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR);  
+					this.sendError(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR);
 				}
 			}
 		}
