@@ -11,16 +11,20 @@ public interface INetTable {
 	 * @return return the table name
 	 */
 	String getTableName();
-	
+
+	void onBeforeCreateTable();
+
 	/**
-	 * Create a new database
+	 * Create a new database override
 	 * @param db the new database parameter
 	 * @see NetDatabase
 	 */
-	void onCreateTable(NetDatabase db);
+	boolean onCreateTable(NetDatabase db);
 	
 	/**
-	 * Initialize a new table (with sql statement)
+	 * After create table callback
+	 * @param isCreate The flag of indicate whether create table success, true means succeed, false means failed.
+	 * @param isUpgrade The flag of indicate whether update state, -1 means not need upgrade, 0 means succeed, 1 means failed.
 	 */
-	void onInitTable();
+	void onAfterCreateTable(boolean isCreate, int isUpgrade);
 }

@@ -92,7 +92,10 @@ public abstract class NetTable implements INetTable {
 		if (!mDatabase.isExist(this.getTableName()))
 		{
 			BFCLog.info(NetConstant.Database, this.getTableName() + " is not exist, and create it");
-			this.onCreateTable(mDatabase);
+			
+			this.onBeforeCreateTable();
+			boolean bIsCreate = this.onCreateTable(mDatabase);
+			int nUpgrade = -1;
 
 			String oldTableName = String.format("%s%d", this.mTableName, this.mOldVersion);
 			if (this.mOldVersion != this.mVersion && 
@@ -114,7 +117,7 @@ public abstract class NetTable implements INetTable {
 						}
 					}
 					
-					this.UpgradeTable(fields);
+					nUpgrade = (true == this.UpgradeTable(fields) ? 0 : 1);
 				}
 				else
 				{
@@ -122,7 +125,7 @@ public abstract class NetTable implements INetTable {
 				}
 			}
 			
-			this.onInitTable();
+			this.onAfterCreateTable(bIsCreate, nUpgrade);
 		}
 		
 		return mDatabase;

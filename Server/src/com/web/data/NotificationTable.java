@@ -18,11 +18,11 @@ public class NotificationTable extends NetTable {
 	private static final String mTableName = "notification";
 	
 	public NotificationTable(DatabaseParam param) {
-		super(param, mTableName, 1, mVersion);
+		super(param, mTableName, mVersion-1, mVersion);
 	}
 	
 	@Override
-	public void onCreateTable(NetDatabase db) {
+	public boolean onCreateTable(NetDatabase db) {
 		
 		NetLog.debug("Expert Table Name: ", this.getTableName());
 		
@@ -35,7 +35,7 @@ public class NotificationTable extends NetTable {
 		
 		mySql += "resever int default '0') ENGINE=InnoDB DEFAULT CHARSET=utf8";
 		
-		db.createTable(mySql);
+		return db.createTable(mySql);
 	}
 
 	public long getCount()
@@ -121,8 +121,10 @@ public class NotificationTable extends NetTable {
 	}
 
 	@Override
-	public void onInitTable() {
-
+	public void onAfterCreateTable(boolean isCreate, int upgrade) {
 	}
 
+	@Override
+	public void onBeforeCreateTable() {
+	}
 }
