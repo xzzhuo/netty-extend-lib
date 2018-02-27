@@ -54,13 +54,25 @@ $(document).ready(function(){
 
 <div id="main_div">
 
-<form name="add" action="add_item.html?act=act_add_item" method="post">
-<button type="submit">Add Item</button>
-</form>
-
-<form name="adds" action="index.html?act=act_add_test_items" method="post">
-<button type="submit">Add Items(5)</button>
-</form>
+<table>
+	<tbody>
+		<tr>
+		
+			<td>
+				<form name="add" action="add_item.html?act=act_add_item" method="post">
+					<button type="submit">Add Item</button>
+				</form>
+			</td>
+			
+			<td>
+				<form name="adds" action="index.html?act=act_add_test_items" method="post">
+					<button type="submit">Add Items(5)</button>
+				</form>
+			</td>
+		
+		</tr>
+	</tbody>
+</table>
 
 <div class="ajax-table" id="table-list">
 <table border=1>
@@ -100,10 +112,33 @@ $(document).ready(function(){
 </table>
 </div>
 
-<form enctype="multipart/form-data" action="index.html?act=upload" method="post">
-       <input name="myFile" type="file">
-       <input type="submit"value="上传文件">
-</form>
+<br>
+
+<table border=1>
+	<tbody>
+		<tr>
+			<td>测试文件上传</td>
+			<td>
+				<form enctype="multipart/form-data" action="index.html?act=act_upload" method="post">
+				       <input name="myFile" type="file">
+				       <input type="submit"value="上传文件">
+				</form>
+			</td>
+		</tr>
+		<tr>
+			<td>测试图片显示,code=100</td>
+			<td>
+				<div><img src="images/icon.png?code=100" height="30" width="30" alt="original icon.png" />original</div>
+			</td>
+		</tr>
+		<tr>
+			<td>测试图片显示, code=200</td>
+			<td>
+				<div><img src="images/icon.png?code=200" height="30" width="30" alt="redirected icon.png" />redirected</div>
+			</td>
+		</tr>
+	</tbody>
+</table>
 
 </div>
 

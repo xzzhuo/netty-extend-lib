@@ -331,7 +331,7 @@ public class DemoProcess extends NetProcess {
 				NetLog.error("Bean", e.getMessage());
 			}
 		}
-		else if (act.equals("upload"))
+		else if (act.equals("act_upload"))
 		{
 			NetFile netFile = this.getFile("myFile");
 			
@@ -453,5 +453,16 @@ public class DemoProcess extends NetProcess {
 
 		NetLog.debug(address, "Leave DemoProcess - Process()");
 		NetLog.debug(address, "=============================");
+	}
+
+	@Override
+	protected String onImageRedirectCheck(String client, String path,
+			Map<String, String> request) {
+			
+		if (request.containsKey("code") && request.get("code").equals("100"))
+		{
+			return path;
+		}
+		return Config.instance().getRootPath() + "/images/wait.gif";
 	}
 }

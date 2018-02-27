@@ -45,7 +45,7 @@ public abstract class NetProcess {
 	 * @param request request parameters
 	 */
 	protected abstract void onProcess(String client, String uri, Map<String, String> request);
-	
+
 	private void setUri(String mUri) {
 		this.mUri = mUri;
 	}
@@ -254,11 +254,11 @@ public abstract class NetProcess {
 				if (mimeType != null && !mimeType.isEmpty())
 				{
 					String[] type = mimeType.split("/");
-					if (type[0].trim().equals("text"))
+					if (type[0].trim().toLowerCase().equals("text".toLowerCase()))
 					{
 						result.setReturnType(ReturnType.TEXT);
 						result.setMimeType(mimeType);
-						if (type[1].trim().equals("html"))
+						if (type[1].trim().toLowerCase().equals("html".toLowerCase()))
 						{
 							this.onProcess(client, p.getAbsolutePath(), processAdapter.getRequest());
 							result.setText(this.getResponseText());
@@ -272,11 +272,24 @@ public abstract class NetProcess {
 								text = NetUtils.readText(p.getAbsolutePath(), processAdapter.getCharset());
 							} catch (Exception e) {
 								text = new StringBuilder();
-								BFCLog.error(NetConstant.System, "Error: " + e.getMessage(), true); 
+								BFCLog.error(NetConstant.System, "Error: " + e.getMessage(), true);
 							}
 							
 							result.setText(text);
 						}
+					}
+					else if (type[0].trim().toLowerCase().equals("image".toLowerCase()))
+					{
+						BFCLog.debug(NetConstant.System, "image request", true);
+						
+						String pathOfRedirect = this.onImageRedirectCheck(client, p.getAbsolutePath(), processAdapter.getRequest());
+
+						if (null != pathOfRedirect && !pathOfRedirect.isEmpty()) {
+							pathOfRedirect = (new File(pathOfRedirect)).getAbsolutePath();
+						}
+
+						result.setFilePath(pathOfRedirect);
+						result.setReturnType(ReturnType.FILE);
 					}
 					else
 					{
@@ -445,5 +458,16 @@ public abstract class NetProcess {
 	 */
 	public NetCharset getCharset() {
 		return this.mCharset;
+	}
+	
+	/**
+	 * Image request process
+	 * @param client Client address
+	 * @param path Image file path
+	 * @param request Request parameters
+	 * @return Return the new path
+	 */
+	protected String onImageRedirectCheck(String client, String path, Map<String, String> request) {
+		return path;
 	}
 }
