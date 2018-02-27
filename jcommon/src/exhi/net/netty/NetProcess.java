@@ -44,7 +44,7 @@ public abstract class NetProcess {
 	 * @param uri http request uri
 	 * @param request request parameters
 	 */
-	protected abstract void onProcess(String client, String uri, Map<String, String> request);
+	protected abstract void onProcess(final String client, final String uri, final Map<String, String> request);
 
 	private void setUri(String mUri) {
 		this.mUri = mUri;
@@ -133,7 +133,7 @@ public abstract class NetProcess {
 	/**
 	 * Error process for 404
 	 */
-	protected void onErrorNotFind(String client, String uri)
+	protected void onErrorNotFind(final String client, final String uri)
 	{
 		this.bIsNotImplement404Callback = true;
 		BFCLog.warning(NetConstant.System, "Not implement the callback for 404 error.");
@@ -141,7 +141,7 @@ public abstract class NetProcess {
 		return;
 	}
 	
-	NettyResult innerErrorNotFind(String client, String uri)
+	NettyResult innerErrorNotFind(final String client, final String uri)
 	{
 		NettyResult result = new NettyResult();
 		
@@ -172,7 +172,7 @@ public abstract class NetProcess {
 	 * @param charset charset
 	 * @return return the NettyResult object
 	 */
-	NettyResult innerProcess(ProcessAdapter processAdapter)
+	NettyResult innerProcess(final ProcessAdapter processAdapter)
 	{
 		String client = processAdapter.getClient();
 		String uri = processAdapter.getUri();
@@ -467,7 +467,7 @@ public abstract class NetProcess {
 	 * @param request Request parameters
 	 * @return Return the new path
 	 */
-	protected String onImageRedirectCheck(String client, String path, Map<String, String> request) {
+	protected String onImageRedirectCheck(final String client, final String path, final Map<String, String> request) {
 		return path;
 	}
 }

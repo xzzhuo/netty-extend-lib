@@ -30,7 +30,7 @@ public class DemoProcess extends NetProcess {
 		mWebUtil = new WebUtil(this);
 	}
 	
-	public Pages calculatePages(NetTable table, Map<String, String> request)
+	public Pages calculatePages(NetTable table, final Map<String, String> request)
 	{
 		Pages pages = new Pages();
 
@@ -75,7 +75,7 @@ public class DemoProcess extends NetProcess {
 	}
 	
 	@Override
-	protected void onErrorNotFind(String client, String uri)
+	protected void onErrorNotFind(final String client, final String uri)
 	{
 		// this.print("Failure: 404 Not Found");
 		
@@ -87,7 +87,7 @@ public class DemoProcess extends NetProcess {
 	}
 	
 	@Override
-	public void onProcess(String address, String path, Map<String, String> request) {
+	public void onProcess(final String address, final String path, final Map<String, String> request) {
 		
 		NetLog.debug(address, "=============================");
 		NetLog.debug(address, "Enter DemoProcess - Process()");
@@ -456,8 +456,8 @@ public class DemoProcess extends NetProcess {
 	}
 
 	@Override
-	protected String onImageRedirectCheck(String client, String path,
-			Map<String, String> request) {
+	protected String onImageRedirectCheck(final String client, final String path,
+			final Map<String, String> request) {
 			
 		if (request.containsKey("code") && request.get("code").equals("100"))
 		{

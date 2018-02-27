@@ -9,8 +9,8 @@ import exhi.net.netty.NetProcess;
 public final class NettyTestProcess extends NetProcess {
 
 	@Override
-	protected void onProcess(String client, String uri,
-			Map<String, String> request) {
+	protected void onProcess(final String client, final String uri,
+			final Map<String, String> request) {
 		BFCLog.debug("Test", "uri = " + uri);
 		BFCLog.debug("Test", "request = " + request.toString());
 		
