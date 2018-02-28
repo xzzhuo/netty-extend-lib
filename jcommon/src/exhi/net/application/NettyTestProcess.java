@@ -14,7 +14,7 @@ public final class NettyTestProcess extends NetProcess {
 		BFCLog.debug("Test", "uri = " + uri);
 		BFCLog.debug("Test", "request = " + request.toString());
 		
-		String html = "<html><head><title>netty-extend-lib</title></head><body>%s%s</body></html>";
+		String html = "<html><head><title>netty-extend-lib</title></head><body>%s</body></html>";
 		if (uri.contains("test"))
 		{
 			this.setCookie("name", "test", 60);
