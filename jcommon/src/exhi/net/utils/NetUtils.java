@@ -12,9 +12,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.FileNameMap;
+import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.security.MessageDigest;
@@ -68,34 +70,43 @@ public class NetUtils {
 
 	public static String getAbsoluteUrl(String root, String uri)
 	{
-		// Convert to absolute path.
+		final String separatorString = String.format("%c", File.separatorChar);
 		
-        if (uri.indexOf('?') >= 0)
+		String path = new String(uri.trim());
+		
+		// remove '?' and after the request
+        if (path.indexOf('?') >= 0)
         {
-        	uri = uri.split("\\?")[0];
+        	path = path.split("\\?")[0];
         }
         
-        uri = uri.replace('/', File.separatorChar);
+		// Convert to absolute path.
+        path = String.format("%s%c%s", root.trim(), File.separatorChar, path);
 
-        if (uri.startsWith(""+File.separatorChar))
-        {
-        	uri = root.trim() + uri;
-        }
-        else
-        {
-        	uri = root.trim() + File.separator + uri;
+		// replace '/' or '\\' to File.separatorChar
+        path = path.replace('/', File.separatorChar);
+        path = path.replace('\\', File.separatorChar);
+
+        boolean endSeparator = path.endsWith(separatorString);
+        
+        StringBuilder pathBuilder = new StringBuilder();
+        pathBuilder.append(SystemPropertyUtil.get("user.dir"));
+        pathBuilder.append(File.separatorChar);
+
+        // Remove extra characters of File.separatorChar
+        String[] pathArray = path.split('\\'+separatorString);
+        for (String str : pathArray) {
+        	if (!str.isEmpty()) {
+        		pathBuilder.append(str);
+        		pathBuilder.append(File.separatorChar);
+        	}
         }
         
-        if (uri.startsWith(""+File.separatorChar))
-        {
-        	uri = SystemPropertyUtil.get("user.dir") + uri;
-        }
-        else
-        {
-        	uri = SystemPropertyUtil.get("user.dir") + File.separator + uri;
+        if (!endSeparator) {
+        	pathBuilder.deleteCharAt(pathBuilder.length()-1);
         }
 
-        return uri;
+        return pathBuilder.toString();
 	}
 	
 	public static StringBuilder readText(String path, String charset)
@@ -170,4 +181,46 @@ public class NetUtils {
 
 		return sb.toString();
 	}
+    
+    /**
+     * Attemp to create an URL directly
+     * @param basePath The base path
+     * @param fileName The file name
+     * @return return URL
+     */
+    URL locateFromURL(String basePath, String fileName) {
+    	try
+        {
+            URL url;
+            if (basePath == null)
+            {
+                return new URL(fileName);
+                //url = new URL(name);
+            }
+            else
+            {
+                URL baseURL = new URL(basePath);
+                url = new URL(baseURL, fileName);
+
+                // check if the file exists
+                InputStream in = null;
+                try
+                {
+                    in = url.openStream();
+                }
+                finally
+                {
+                    if (in != null)
+                    {
+                        in.close();
+                    }
+                }
+                return url;
+            }
+        }
+        catch (IOException e)
+        {
+            return null;
+        }
+    }
 }

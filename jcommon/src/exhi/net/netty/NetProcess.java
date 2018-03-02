@@ -219,9 +219,11 @@ public abstract class NetProcess {
 			}
 	
 			if (p.isDirectory())
-			{	
+			{
+				/*
+				// 忘了有什么作用了？
 				String newUri = uri;
-				if (newUri.indexOf("?") >= 0 && newUri.indexOf(File.separator+"?") <= 0)
+				if (newUri.indexOf("?") >= 0 && newUri.indexOf(File.separator+"?") < 0)
 				{
 					newUri = newUri.replace("?", File.separator+"?");
 				}
@@ -237,9 +239,16 @@ public abstract class NetProcess {
 					result.setText(new StringBuilder(newUri));
 					return result;
 				}
+				*/
 				
 				// set default file for html or htm
-				p = new File(p.getAbsolutePath(),"index.html");
+				File p1 = new File(p.getAbsolutePath(),"index.html");
+				if (p1.isFile() && p1.exists()) {
+					p = p1;
+				}
+				else {
+					p = new File(p.getAbsolutePath(),"index.htm");
+				}
 			}
 			
 			if (p.isFile() && p.exists())
