@@ -82,7 +82,7 @@ public class DemoProcess extends NetProcess {
 		NetLog.info(client, "uri = " + uri);
 		
 		String workPath = this.getWorkPath();
-		mWebUtil.setTemplatePath(String.format("%s/%s", workPath, Config.instance().getRootPath()));
+		mWebUtil.setTemplatePath(String.format("%s/%s", workPath, Config.instance().getRootFolder()));
 		mWebUtil.display("404.html");
 	}
 	
@@ -133,6 +133,10 @@ public class DemoProcess extends NetProcess {
 				
 				mWebUtil.assign("go_url", "index.html");
 				mWebUtil.assign("go_act", "main");
+				
+				mWebUtil.assign("work_path", this.getWorkPath());
+				mWebUtil.assign("root_path", this.getRootPath());
+				mWebUtil.assign("resource_path", this.getResourcePath());
 				
 				mWebUtil.display(tempFile.getName());
 			}
@@ -463,6 +467,6 @@ public class DemoProcess extends NetProcess {
 		{
 			return path;
 		}
-		return Config.instance().getRootPath() + "/images/wait.gif";
+		return Config.instance().getRootFolder() + "/images/wait.gif";
 	}
 }

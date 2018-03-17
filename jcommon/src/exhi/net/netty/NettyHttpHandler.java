@@ -522,7 +522,7 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
         		
         		try {
         			File uploadFile = new File(fileUpload.getFilename());
-	        		File tempDir = new File(mApplication.getHelper().getConfig().getTempPath());
+	        		File tempDir = new File(mApplication.getHelper().getConfig().getTempFolder());
 	        		
 	        		File tempFile = File.createTempFile("netup_", "_"+uploadFile.getName(), tempDir);
 	        		fileUpload.renameTo(tempFile);
@@ -573,9 +573,10 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 		processAdapter.setCookies(cookies);
 		processAdapter.setFiles(files);
 		processAdapter.setRequest(request);
-		processAdapter.setRootPath(config.getRootPath());
+		processAdapter.setRootFolder(config.getRootFolder());
 		processAdapter.setServerType(config.getServerType());
 		processAdapter.setUri(uri);
+		processAdapter.setResourceFolder(config.getResourceFolder());
 		NettyResult nettyResult = this.mNettyProcess.innerProcess(processAdapter);
 		
 		if (nettyResult == null)

@@ -21,13 +21,14 @@ public class Config implements INetConfig {
 	private final String mConfigFile = "server.conf";
 	
 	private int mPort = 8088;
-	private String mRootPath = "webpages";
+	private String mRootFolder = "webpages";
 
 	private DatabaseParam mDBParam = null;
 	
 	private NetCharset mCharset = NetCharset.UTF_8;
 	private LogLevel mLogLevel = LogLevel.Debug;
-	private String mTempPath = "temp";
+	private String mTempFolder = "temp";
+	private String mResourceFolder = "resource";
 	
 	private static Config mConfig = new Config();
 	
@@ -79,9 +80,9 @@ public class Config implements INetConfig {
 							{
 								this.mPort = Integer.parseInt(value);
 							}
-							else if (key.equals("root_path".toLowerCase()))
+							else if (key.equals("root_folder".toLowerCase()))
 							{
-								this.mRootPath = value;
+								this.mRootFolder = value;
 							}
 							else if (key.equals("db_user".toLowerCase()))
 							{
@@ -111,9 +112,13 @@ public class Config implements INetConfig {
 							{
 								mLogLevel = LogLevel.valueOf(value);
 							}
-							else if (key.equalsIgnoreCase("temp_path"))
+							else if (key.equalsIgnoreCase("temp_folder"))
 							{
-								this.mTempPath = value;
+								this.mTempFolder = value;
+							}
+							else if (key.equalsIgnoreCase("resource_folder"))
+							{
+								this.mResourceFolder = value;
 							}
 						}
 						else if (split.length > 0)
@@ -146,13 +151,13 @@ public class Config implements INetConfig {
 	}
 
 	@Override
-	public String getRootPath() {
-		return mRootPath;
+	public String getRootFolder() {
+		return mRootFolder;
 	}
 
 	@Override
-	public String getTempPath() {
-		return this.mTempPath;
+	public String getTempFolder() {
+		return this.mTempFolder;
 	}
 
 	@Override
@@ -168,6 +173,11 @@ public class Config implements INetConfig {
 	@Override
 	public ServerType getServerType() {
 		return ServerType.WEB_SERVER;
+	}
+
+	@Override
+	public String getResourceFolder() {
+		return this.mResourceFolder;
 	}
 
 }

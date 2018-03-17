@@ -37,6 +37,8 @@ public abstract class NetProcess {
 	private String mUri = "";
 	private boolean bIsNotImplement404Callback = false;
 	private NetCharset mCharset = NetCharset.UTF_8;
+	private String mRootPath = "";
+	private String mResourcePath = "";
 
 	/**
 	 * Http request process
@@ -203,10 +205,15 @@ public abstract class NetProcess {
 		BFCLog.debug(client, "uri = " + uri);
 		
 		BFCLog.debug(client, "user dir = " + SystemPropertyUtil.get("user.dir"));
+		this.mRootPath = NetUtils.getAbsoluteUrl(SystemPropertyUtil.get("user.dir"),
+				processAdapter.getRootFolder(), null);
+		this.mResourcePath = NetUtils.getAbsoluteUrl(SystemPropertyUtil.get("user.dir"),
+				processAdapter.getRootFolder(), processAdapter.getResourceFolder());
 		
 		if (processAdapter.getServerType() == ServerType.WEB_SERVER)
 		{
-			String path = NetUtils.getAbsoluteUrl(processAdapter.getRootPath(), uri);
+			String path = NetUtils.getAbsoluteUrl(SystemPropertyUtil.get("user.dir"),
+					processAdapter.getRootFolder(), uri);
 			File p = new File(path);
 			if (!p.exists())
 			{
@@ -349,6 +356,24 @@ public abstract class NetProcess {
 	protected String getWorkPath()
 	{
 		return SystemPropertyUtil.get("user.dir");
+	}
+
+	/**
+	 * Get root path
+	 * @return Return the root path
+	 */
+	protected String getRootPath()
+	{
+		return this.mRootPath;
+	}
+
+	/**
+	 * Get the resource path
+	 * @return Return the resource path
+	 */
+	protected String getResourcePath()
+	{
+		return this.mResourcePath;
 	}
 
 	/**

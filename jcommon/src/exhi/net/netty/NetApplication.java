@@ -136,7 +136,7 @@ public abstract class NetApplication implements INetApplication {
 			
 			this.onInit();
 			
-			String tempPath = config.getTempPath();
+			String tempPath = config.getTempFolder();
 			File tempFile = new File(tempPath);
 			if (!tempFile.exists() || !tempFile.isDirectory())
 			{
@@ -151,7 +151,7 @@ public abstract class NetApplication implements INetApplication {
 
 		BFCLog.info(NetConstant.System, "Port: " + config.getServerPort());
 		BFCLog.info(NetConstant.System, "Charset: " + config.getCharset());
-		BFCLog.info(NetConstant.System, "Root: " + config.getRootPath());
+		BFCLog.info(NetConstant.System, "Root: " + config.getRootFolder());
 		if (p != null)
 		{
 			BFCLog.info(NetConstant.System, "Porcess: " + p.getClass().getName());

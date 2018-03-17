@@ -4,8 +4,6 @@
 
 package exhi.net.utils;
 
-import io.netty.util.internal.SystemPropertyUtil;
-
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
@@ -68,33 +66,37 @@ public class NetUtils {
     	return type;
 	}
 
-	public static String getAbsoluteUrl(String root, String uri)
+	public static String getAbsoluteUrl(String root, String path, String uri)
 	{
 		final String separatorString = String.format("%c", File.separatorChar);
-		
-		String path = new String(uri.trim());
+
+		if (null == uri) {
+			uri = "";
+		}
+
+		String temp = new String(uri.trim());
 		
 		// remove '?' and after the request
-        if (path.indexOf('?') >= 0)
+        if (temp.indexOf('?') >= 0)
         {
-        	path = path.split("\\?")[0];
+        	temp = temp.split("\\?")[0];
         }
         
 		// Convert to absolute path.
-        path = String.format("%s%c%s", root.trim(), File.separatorChar, path);
+        temp = String.format("%s%c%s", path.trim(), File.separatorChar, temp);
 
 		// replace '/' or '\\' to File.separatorChar
-        path = path.replace('/', File.separatorChar);
-        path = path.replace('\\', File.separatorChar);
+        temp = temp.replace('/', File.separatorChar);
+        temp = temp.replace('\\', File.separatorChar);
 
-        boolean endSeparator = path.endsWith(separatorString);
+        boolean endSeparator = temp.endsWith(separatorString);
         
         StringBuilder pathBuilder = new StringBuilder();
-        pathBuilder.append(SystemPropertyUtil.get("user.dir"));
+        pathBuilder.append(root);
         pathBuilder.append(File.separatorChar);
 
         // Remove extra characters of File.separatorChar
-        String[] pathArray = path.split('\\'+separatorString);
+        String[] pathArray = temp.split('\\'+separatorString);
         for (String str : pathArray) {
         	if (!str.isEmpty()) {
         		pathBuilder.append(str);

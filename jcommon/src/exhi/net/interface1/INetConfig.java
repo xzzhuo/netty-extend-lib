@@ -6,6 +6,7 @@ package exhi.net.interface1;
 
 /**
  * The configure interface of NetApplication
+ * 
  * @author XiaoZhao
  * @see exhi.net.netty.NetApplication
  *
@@ -13,39 +14,51 @@ package exhi.net.interface1;
 public interface INetConfig {
 
 	/**
-	 * Return the server port
+	 * Get the server port
+	 * 
 	 * @return Return the server port
 	 */
-	int 		getServerPort();
-	
+	int getServerPort();
+
 	/**
-	 * Return the web template root path
-	 * @return Return the web template root path
+	 * Get the web template root folder name
+	 * 
+	 * @return Return the web template root folder name
 	 */
-	String 		getRootPath();
-	
+	String getRootFolder();
+
 	/**
-	 * Return the temporary folder
-	 * @return Return the temporary folder
+	 * Get the temporary folder name
+	 * 
+	 * @return Return the temporary folder name
 	 */
-	String 		getTempPath();
-	
+	String getTempFolder();
+
 	/**
-	 * Return char set, eg: NetCharset.UTF_8
+	 * Get char set, eg: NetCharset.UTF_8
+	 * 
 	 * @return Return char set
 	 */
-	NetCharset 	getCharset();
-	
+	NetCharset getCharset();
+
 	/**
-	 * Return the log output level, eg: LogLevel.Debug
+	 * Get the log output level, eg: LogLevel.Debug
+	 * 
 	 * @return Return the log output level
 	 */
-	LogLevel 	getLogLevel();
-	
+	LogLevel getLogLevel();
+
 	/**
-	 * Return the current server type
+	 * Get the current server type
+	 * 
 	 * @return Return the current server type
 	 */
-	ServerType 	getServerType();
-	
+	ServerType getServerType();
+
+	/**
+	 * Get the resource folder name
+	 * 
+	 * @return Return the resource folder name
+	 */
+	String getResourceFolder();
 }

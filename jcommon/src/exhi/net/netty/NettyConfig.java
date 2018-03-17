@@ -17,12 +17,12 @@ public class NettyConfig implements INetConfig {
 	}
 
 	@Override
-	public String getRootPath() {
+	public String getRootFolder() {
 		return "webpages";
 	}
 
 	@Override
-	public String getTempPath() {
+	public String getTempFolder() {
 		return "Temp";
 	}
 
@@ -39,5 +39,10 @@ public class NettyConfig implements INetConfig {
 	@Override
 	public ServerType getServerType() {
 		return ServerType.COMMAND;
+	}
+
+	@Override
+	public String getResourceFolder() {
+		return "resource";
 	}
 }

@@ -9,7 +9,7 @@ import exhi.net.interface1.ServerType;
 
 class ProcessAdapter {
 	
-	private String rootPath;
+	private String rootFolder;
 	private ServerType serverType;
 	private String client;
 	private String uri;
@@ -17,12 +17,13 @@ class ProcessAdapter {
 	private Map<String, NetFile> files;
 	private Map<String, String> request;
 	private String charset;
+	private String resource;
 	
-	public String getRootPath() {
-		return rootPath;
+	public String getRootFolder() {
+		return rootFolder;
 	}
-	public void setRootPath(String rootPath) {
-		this.rootPath = rootPath;
+	public void setRootFolder(String rootPath) {
+		this.rootFolder = rootPath;
 	}
 	public ServerType getServerType() {
 		return serverType;
@@ -65,5 +66,11 @@ class ProcessAdapter {
 	}
 	public void setCharset(String charset) {
 		this.charset = charset;
+	}
+	public String getResourceFolder() {
+		return resource;
+	}
+	public void setResourceFolder(String folder) {
+		resource = folder;
 	}
 }
