@@ -7,7 +7,6 @@ package exhi.net.netty;
 import exhi.net.interface1.INetConfig;
 import exhi.net.interface1.LogLevel;
 import exhi.net.interface1.NetCharset;
-import exhi.net.interface1.ServerType;
 
 public class NettyConfig implements INetConfig {
 
@@ -37,12 +36,7 @@ public class NettyConfig implements INetConfig {
 	}
 
 	@Override
-	public ServerType getServerType() {
-		return ServerType.COMMAND;
-	}
-
-	@Override
-	public String getResourceFolder() {
-		return "resource";
+	public String getUploadFolder() {
+		return "upload";
 	}
 }

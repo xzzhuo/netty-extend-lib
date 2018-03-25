@@ -10,7 +10,6 @@ import exhi.net.database.DatabaseParam;
 import exhi.net.interface1.INetConfig;
 import exhi.net.interface1.LogLevel;
 import exhi.net.interface1.NetCharset;
-import exhi.net.interface1.ServerType;
 import exhi.net.log.NetLog;
 
 public class Config implements INetConfig {
@@ -28,7 +27,7 @@ public class Config implements INetConfig {
 	private NetCharset mCharset = NetCharset.UTF_8;
 	private LogLevel mLogLevel = LogLevel.Debug;
 	private String mTempFolder = "temp";
-	private String mResourceFolder = "resource";
+	private String mUploadFolder = "upload";
 	
 	private static Config mConfig = new Config();
 	
@@ -116,9 +115,9 @@ public class Config implements INetConfig {
 							{
 								this.mTempFolder = value;
 							}
-							else if (key.equalsIgnoreCase("resource_folder"))
+							else if (key.equalsIgnoreCase("upload_folder"))
 							{
-								this.mResourceFolder = value;
+								this.mUploadFolder = value;
 							}
 						}
 						else if (split.length > 0)
@@ -171,13 +170,8 @@ public class Config implements INetConfig {
 	}
 
 	@Override
-	public ServerType getServerType() {
-		return ServerType.WEB_SERVER;
-	}
-
-	@Override
-	public String getResourceFolder() {
-		return this.mResourceFolder;
+	public String getUploadFolder() {
+		return this.mUploadFolder;
 	}
 
 }

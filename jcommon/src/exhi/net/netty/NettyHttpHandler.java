@@ -502,7 +502,7 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
             
             // MyLog.debug(getChannelAddress(), "value = " + value);
             
-            if (value.length() > 4096) {
+            if (value.length() > NettyServer.POST_BODY_SIZE) {
             	BFCLog.warning(getChannelAddress(), "BODY Attribute: " + attribute.getHttpDataType().name() + ":"
                         + attribute.getName() + " data too long");
             } else {
@@ -558,7 +558,7 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 		
 		if (this.mNettyProcess == null)
 		{
-			BFCLog.error(getChannelAddress(), "No web process");
+			BFCLog.error(getChannelAddress(), "No user process");
 			this.sendError(ctx, HttpResponseStatus.NOT_IMPLEMENTED);
 			return;
 		}
@@ -574,10 +574,33 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 		processAdapter.setFiles(files);
 		processAdapter.setRequest(request);
 		processAdapter.setRootFolder(config.getRootFolder());
-		processAdapter.setServerType(config.getServerType());
 		processAdapter.setUri(uri);
-		processAdapter.setResourceFolder(config.getResourceFolder());
-		NettyResult nettyResult = this.mNettyProcess.innerProcess(processAdapter);
+		processAdapter.setUploadFolder(config.getUploadFolder());
+		
+		NettyResult nettyResult = null;
+		
+		if (this.mNettyProcess instanceof WebProcess)
+		{
+			WebProcess web = (WebProcess)this.mNettyProcess;
+			nettyResult = web.innerWebProcess(processAdapter);
+			
+			if (nettyResult.getReturnType() == ReturnType.ERR_NOT_FOUND) {
+				// if not find the file then redirect to process
+				nettyResult = web.innerErrorNotFind(getChannelAddress(), processAdapter.getRequest());
+			}
+			
+			if (nettyResult.getReturnType() == ReturnType.ERR_NOT_IMPLEMENT_404_CALLBACK)
+			{
+				// if not implement the callback for 404 then show error message
+				// BFCLog.error(getChannelAddress(), "'" + nettyResult.getFilePath() +"' is not exist");
+				nettyResult.setReturnType(ReturnType.ERR_NOT_FOUND);
+			}
+		} else if (this.mNettyProcess instanceof CommandProcess) {
+			CommandProcess web = (CommandProcess)this.mNettyProcess;
+			nettyResult = web.innerCommandProcess(processAdapter);
+		} else {
+			// skip
+		}
 		
 		if (nettyResult == null)
 		{
@@ -585,23 +608,7 @@ class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 		}
 		else if (nettyResult.getReturnType() == ReturnType.ERR_NOT_FOUND)
 		{
-			String val = uri;
-			int index = val.indexOf('?');
-			if (index > 0)
-			{
-				val = val.substring(0, index);
-			}
-			NettyResult result = this.mNettyProcess.innerErrorNotFind(getChannelAddress(), val);
-			if (result.getReturnType() == ReturnType.ERR_NOT_IMPLEMENT_404_CALLBACK)
-			{
-				// if not implement the callback for 404 then show error message
-				BFCLog.error(getChannelAddress(), "'" + nettyResult.getFilePath() +"' is not exist");
-				this.sendError(ctx, HttpResponseStatus.NOT_FOUND);
-			}
-			else
-			{
-				writeResponse(ctx.channel(), result.getText(), "text/html", config.getCharset(), null);
-			}
+			this.sendErrorWithCookies(ctx, HttpResponseStatus.NOT_FOUND, this.mNettyProcess.getCookies());
 		}
 		else
 		{

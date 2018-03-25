@@ -49,16 +49,9 @@ public interface INetConfig {
 	LogLevel getLogLevel();
 
 	/**
-	 * Get the current server type
+	 * Get the upload folder name
 	 * 
-	 * @return Return the current server type
+	 * @return Return the upload folder name
 	 */
-	ServerType getServerType();
-
-	/**
-	 * Get the resource folder name
-	 * 
-	 * @return Return the resource folder name
-	 */
-	String getResourceFolder();
+	String getUploadFolder();
 }

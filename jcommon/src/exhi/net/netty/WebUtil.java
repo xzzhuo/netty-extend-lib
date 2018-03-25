@@ -18,19 +18,19 @@ import freemarker.template.TemplateException;
 
 public class WebUtil {
 
-	private NetProcess mProcess = null;
+	private WebProcess mProcess = null;
 	private NetCharset mCharset = NetCharset.UTF_8;
 	private Map<String, Object> mParam = new HashMap<String, Object>();
 	private String mTemplatePath = ".";
 	
-	public WebUtil(NetProcess process)
+	public WebUtil(WebProcess process)
 	{
 		this.mProcess = process;
 		this.mCharset = process.getCharset();
 		this.mTemplatePath = System.getProperty("user.dir");
 	}
 	
-	public WebUtil(NetProcess process, NetCharset charset)
+	public WebUtil(WebProcess process, NetCharset charset)
 	{
 		this.mProcess = process;
 		this.mCharset = charset;

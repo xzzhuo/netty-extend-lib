@@ -17,6 +17,9 @@ import exhi.net.log.BFCLog;
 
 class NettyServer {
 	
+	public static final int POST_BODY_SIZE = 4096;
+	public static final int UPLOAD_FILE_SIZE = 1024*10240;
+	
 	public final boolean isSSL = true;
 	
 	public void start(NetApplication app, int port) throws InterruptedException

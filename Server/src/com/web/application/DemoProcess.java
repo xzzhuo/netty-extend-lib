@@ -14,14 +14,14 @@ import exhi.net.database.DatabaseParam;
 import exhi.net.database.NetTable;
 import exhi.net.log.NetLog;
 import exhi.net.netty.NetFile;
-import exhi.net.netty.NetProcess;
+import exhi.net.netty.WebProcess;
 import exhi.net.netty.WebUtil;
 import exhi.net.utils.ExcelException;
 import exhi.net.utils.ExcelUtils;
 import exhi.net.utils.TransferException;
 import exhi.net.utils.TransferUtils;
 
-public class DemoProcess extends NetProcess {
+public class DemoProcess extends WebProcess {
 
 	private WebUtil mWebUtil = null;
 	
@@ -75,7 +75,7 @@ public class DemoProcess extends NetProcess {
 	}
 	
 	@Override
-	protected void onErrorNotFind(final String client, final String uri)
+	protected void onRedirectProcess(final String client, final String uri, final Map<String, String> request)
 	{
 		// this.print("Failure: 404 Not Found");
 		
@@ -136,7 +136,7 @@ public class DemoProcess extends NetProcess {
 				
 				mWebUtil.assign("work_path", this.getWorkPath());
 				mWebUtil.assign("root_path", this.getRootPath());
-				mWebUtil.assign("resource_path", this.getResourcePath());
+				mWebUtil.assign("upload_path", this.getUploadPath());
 				
 				mWebUtil.display(tempFile.getName());
 			}

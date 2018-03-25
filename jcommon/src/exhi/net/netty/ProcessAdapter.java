@@ -5,31 +5,22 @@ import io.netty.handler.codec.http.cookie.Cookie;
 import java.util.Map;
 import java.util.Set;
 
-import exhi.net.interface1.ServerType;
-
 class ProcessAdapter {
 	
 	private String rootFolder;
-	private ServerType serverType;
 	private String client;
 	private String uri;
 	private Set<Cookie> cookies;
 	private Map<String, NetFile> files;
 	private Map<String, String> request;
 	private String charset;
-	private String resource;
+	private String upload;
 	
 	public String getRootFolder() {
 		return rootFolder;
 	}
 	public void setRootFolder(String rootPath) {
 		this.rootFolder = rootPath;
-	}
-	public ServerType getServerType() {
-		return serverType;
-	}
-	public void setServerType(ServerType serverType) {
-		this.serverType = serverType;
 	}
 	public String getClient() {
 		return client;
@@ -67,10 +58,10 @@ class ProcessAdapter {
 	public void setCharset(String charset) {
 		this.charset = charset;
 	}
-	public String getResourceFolder() {
-		return resource;
+	public String getUploadFolder() {
+		return upload;
 	}
-	public void setResourceFolder(String folder) {
-		resource = folder;
+	public void setUploadFolder(String folder) {
+		upload = folder;
 	}
 }

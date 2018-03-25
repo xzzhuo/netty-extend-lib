@@ -8,17 +8,12 @@ import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.util.internal.SystemPropertyUtil;
 
-import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-import exhi.net.constant.NetConstant;
 import exhi.net.interface1.NetCharset;
-import exhi.net.interface1.ServerType;
 import exhi.net.log.BFCLog;
-import exhi.net.netty.NettyResult.ReturnType;
-import exhi.net.utils.FileMimeMap;
 import exhi.net.utils.NetUtils;
 
 /**
@@ -29,16 +24,12 @@ import exhi.net.utils.NetUtils;
  */
 public abstract class NetProcess {
 
-	private StringBuilder mResponseText = new StringBuilder();
-	private NettyResult mDeathResult = null;		// if this value is not null, return this value
 	private Map<String, NetFile> mNetFiles = null;
 	private Map<String, Cookie> mDownCookies = null;
 	private Map<String, Cookie> mUpCookies = new HashMap<String, Cookie>();
-	private String mUri = "";
-	private boolean bIsNotImplement404Callback = false;
 	private NetCharset mCharset = NetCharset.UTF_8;
 	private String mRootPath = "";
-	private String mResourcePath = "";
+	private String mUploadPath = "";
 
 	/**
 	 * Http request process
@@ -48,73 +39,6 @@ public abstract class NetProcess {
 	 */
 	protected abstract void onProcess(final String client, final String uri, final Map<String, String> request);
 
-	private void setUri(String mUri) {
-		this.mUri = mUri;
-	}
-	
-	/**
-	 * Get the URI
-	 * @return Return current URI
-	 */
-	protected String getUri() {
-		return mUri;
-	}
-	
-	private StringBuilder getResponseText() {
-		return mResponseText;
-	}
-
-	void setResponseText(StringBuilder text) {
-		if (text != null)
-		{
-			mResponseText.append(text);
-		}
-	}
-	
-	/**
-	 * Response the text value
-	 * @param value The text value
-	 */
-	protected void print(String value)
-	{
-		setResponseText(new StringBuilder(value));
-	}
-	
-	/**
-	 * Response the last value, after that, no other requests will be responded.
-	 * 
-	 * @param value The text value
-	 */
-	protected void die(String value)
-	{
-		if (mDeathResult != null)
-		{
-			return;
-		}
-		mDeathResult = new NettyResult();
-		
-		StringBuilder sb = new StringBuilder();
-		sb.append(mResponseText);
-		sb.append(value);
-		mDeathResult.setText(sb);
-	}
-	
-	/**
-	 * locate to the special URL, after that, no other requests will be responded.
-	 * 
-	 * @param url The new URL
-	 */
-	protected void location(String url)
-	{
-		if (mDeathResult != null)
-		{
-			return;
-		}
-		mDeathResult = new NettyResult();
-		mDeathResult.setReturnType(ReturnType.LOCATION);
-		mDeathResult.setText(new StringBuilder(url));
-	}
-	
 	/**
 	 * Get net file
 	 * @param key The key of net file
@@ -133,38 +57,6 @@ public abstract class NetProcess {
 	}
 	
 	/**
-	 * Error process for 404
-	 */
-	protected void onErrorNotFind(final String client, final String uri)
-	{
-		this.bIsNotImplement404Callback = true;
-		BFCLog.warning(NetConstant.System, "Not implement the callback for 404 error.");
-		this.print("404 Not Found");
-		return;
-	}
-	
-	NettyResult innerErrorNotFind(final String client, final String uri)
-	{
-		NettyResult result = new NettyResult();
-		
-		this.setUri(uri);
-		
-		this.bIsNotImplement404Callback = false;
-		this.onErrorNotFind(client, uri);
-		
-		if (this.bIsNotImplement404Callback)
-		{
-			result.setReturnType(ReturnType.ERR_NOT_IMPLEMENT_404_CALLBACK);
-		}
-		else
-		{
-			result.setReturnType(ReturnType.TEXT);
-		}
-		result.setText(this.getResponseText());
-		return result;
-	}
-	
-	/**
 	 * Inner process
 	 * @param client client address
 	 * @param uri request uri
@@ -174,13 +66,19 @@ public abstract class NetProcess {
 	 * @param charset charset
 	 * @return return the NettyResult object
 	 */
-	NettyResult innerProcess(final ProcessAdapter processAdapter)
+	final void innerProcess(final ProcessAdapter processAdapter)
 	{
-		String client = processAdapter.getClient();
-		String uri = processAdapter.getUri();
-		
-		this.setUri(uri);
-		
+		BFCLog.debug(processAdapter.getClient(), "Enter innerProcess - Process()");
+		BFCLog.debug(processAdapter.getClient(), "uri = " + processAdapter.getUri());
+
+		String userDir = SystemPropertyUtil.get("user.dir");
+		BFCLog.debug(processAdapter.getClient(), "user dir = " + userDir);
+
+		this.mRootPath = NetUtils.getAbsoluteUrl(userDir,
+				processAdapter.getRootFolder(), null);
+		this.mUploadPath = NetUtils.getAbsoluteUrl(userDir,
+				processAdapter.getRootFolder(), processAdapter.getUploadFolder());
+
 		if (processAdapter.getFiles() == null)
 		{
 			mNetFiles = new HashMap<String, NetFile>();
@@ -197,156 +95,8 @@ public abstract class NetProcess {
 			// MyLog.debug("NetProcess", String.format("%s=%s", cookie.getName(),cookie.getValue()));
 			mDownCookies.put(cookie.name(), cookie);
         }
-
-		mDeathResult = null;
-		NettyResult result = new NettyResult();
 		
-		BFCLog.debug(client, "Enter innerProcess - Process()");
-		BFCLog.debug(client, "uri = " + uri);
-		
-		BFCLog.debug(client, "user dir = " + SystemPropertyUtil.get("user.dir"));
-		this.mRootPath = NetUtils.getAbsoluteUrl(SystemPropertyUtil.get("user.dir"),
-				processAdapter.getRootFolder(), null);
-		this.mResourcePath = NetUtils.getAbsoluteUrl(SystemPropertyUtil.get("user.dir"),
-				processAdapter.getRootFolder(), processAdapter.getResourceFolder());
-		
-		if (processAdapter.getServerType() == ServerType.WEB_SERVER)
-		{
-			String path = NetUtils.getAbsoluteUrl(SystemPropertyUtil.get("user.dir"),
-					processAdapter.getRootFolder(), uri);
-			File p = new File(path);
-			if (!p.exists())
-			{
-				// file or directory is not exist
-				BFCLog.warning(client, "'" + p.getAbsolutePath()+"' is not exist");
-				BFCLog.debug(client, "Leave innerProcess - Process()");
-				result.setReturnType(ReturnType.ERR_NOT_FOUND);
-				result.setFilePath(p.getAbsolutePath());
-				return result;
-			}
-	
-			if (p.isDirectory())
-			{
-				/*
-				// 忘了有什么作用了？
-				String newUri = uri;
-				if (newUri.indexOf("?") >= 0 && newUri.indexOf(File.separator+"?") < 0)
-				{
-					newUri = newUri.replace("?", File.separator+"?");
-				}
-				else if (newUri.indexOf("?") < 0 && !newUri.substring(newUri.length()-1).equals(File.separator))
-				{
-					newUri += File.separator;
-				}
-				
-				if (!newUri.equals(uri))
-				{
-					BFCLog.debug(client, "Relocation");
-					result.setReturnType(ReturnType.LOCATION);
-					result.setText(new StringBuilder(newUri));
-					return result;
-				}
-				*/
-				
-				// set default file for html or htm
-				File p1 = new File(p.getAbsolutePath(),"index.html");
-				if (p1.isFile() && p1.exists()) {
-					p = p1;
-				}
-				else {
-					p = new File(p.getAbsolutePath(),"index.htm");
-				}
-			}
-			
-			if (p.isFile() && p.exists())
-			{
-				String mimeType = FileMimeMap.getMimeType(p.getName());
-				if (null != mimeType) {
-					BFCLog.debug(client, "Mime type = " + mimeType);
-				} else {
-					BFCLog.warning(client, "Get mime type failed");
-				}
-	
-				if (mimeType != null && !mimeType.isEmpty())
-				{
-					String[] type = mimeType.split("/");
-					if (type[0].trim().toLowerCase().equals("text".toLowerCase()))
-					{
-						result.setReturnType(ReturnType.TEXT);
-						result.setMimeType(mimeType);
-						if (type[1].trim().toLowerCase().equals("html".toLowerCase()))
-						{
-							this.onProcess(client, p.getAbsolutePath(), processAdapter.getRequest());
-							result.setText(this.getResponseText());
-						}
-						else
-						{
-							StringBuilder text = null;
-							
-							try {
-								// read source files from disk
-								text = NetUtils.readText(p.getAbsolutePath(), processAdapter.getCharset());
-							} catch (Exception e) {
-								text = new StringBuilder();
-								BFCLog.error(NetConstant.System, "Error: " + e.getMessage(), true);
-							}
-							
-							result.setText(text);
-						}
-					}
-					else if (type[0].trim().toLowerCase().equals("image".toLowerCase()))
-					{
-						BFCLog.debug(NetConstant.System, "image request", true);
-						
-						String pathOfRedirect = this.onImageRedirectCheck(client, p.getAbsolutePath(), processAdapter.getRequest());
-
-						if (null != pathOfRedirect && !pathOfRedirect.isEmpty()) {
-							pathOfRedirect = (new File(pathOfRedirect)).getAbsolutePath();
-						}
-
-						result.setFilePath(pathOfRedirect);
-						result.setReturnType(ReturnType.FILE);
-					}
-					else
-					{
-						result.setReturnType(ReturnType.FILE);
-						result.setFilePath(p.getAbsolutePath());
-					}
-				}
-				else
-				{
-					// not ext name
-					result.setReturnType(ReturnType.FILE);
-					result.setFilePath(p.getAbsolutePath());
-				}
-			}
-			else
-			{
-				BFCLog.warning(client, "'" + p.getAbsolutePath()+"' is not exist");
-				BFCLog.warning(client, "Not support the request url");
-				result.setReturnType(ReturnType.ERR_NOT_FOUND);
-				result.setFilePath(p.getAbsolutePath());
-			}
-		}
-		else if (processAdapter.getServerType() == ServerType.COMMAND)
-		{
-			this.onProcess(client, uri, processAdapter.getRequest());
-			result.setText(this.getResponseText());
-		}
-		
-		if (result != null)
-		{
-			BFCLog.debug(client, "Response file type = " + result.getReturnType());
-		}
-		
-		BFCLog.debug(client, "Leave innerProcess - Process()");
-
-		if (mDeathResult != null)
-		{
-			result = mDeathResult;
-		}
-		
-		return result;
+		BFCLog.debug(processAdapter.getClient(), "Leave innerProcess - Process()");
 	}
 	
 	/**
@@ -368,12 +118,12 @@ public abstract class NetProcess {
 	}
 
 	/**
-	 * Get the resource path
-	 * @return Return the resource path
+	 * Get the upload path
+	 * @return Return the upload path
 	 */
-	protected String getResourcePath()
+	protected String getUploadPath()
 	{
-		return this.mResourcePath;
+		return this.mUploadPath;
 	}
 
 	/**
@@ -475,7 +225,7 @@ public abstract class NetProcess {
 			this.setCookie(key, "", -1);
 		}
 	}
-	
+
 	Map<String, Cookie> getCookies()
 	{
 		return this.mUpCookies;
@@ -492,16 +242,5 @@ public abstract class NetProcess {
 	 */
 	public NetCharset getCharset() {
 		return this.mCharset;
-	}
-	
-	/**
-	 * Image request process
-	 * @param client Client address
-	 * @param path Image file path
-	 * @param request Request parameters
-	 * @return Return the new path
-	 */
-	protected String onImageRedirectCheck(final String client, final String path, final Map<String, String> request) {
-		return path;
 	}
 }

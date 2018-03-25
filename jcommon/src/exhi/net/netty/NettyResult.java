@@ -18,7 +18,7 @@ public class NettyResult {
 	
 	private ReturnType mFileType = ReturnType.TEXT;
 	private StringBuilder mText = null;
-	private String mimeType = null;
+	private String mimeType = "text/html";		// ReturnType.TEXT need set this value 
 	
 	public void setReturnType(ReturnType type)
 	{

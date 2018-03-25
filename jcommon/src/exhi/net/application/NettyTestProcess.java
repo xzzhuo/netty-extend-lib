@@ -4,9 +4,9 @@ import java.util.Map;
 
 import exhi.net.log.BFCLog;
 import exhi.net.netty.NetFile;
-import exhi.net.netty.NetProcess;
+import exhi.net.netty.WebProcess;
 
-public final class NettyTestProcess extends NetProcess {
+public final class NettyTestProcess extends WebProcess {
 
 	@Override
 	protected void onProcess(final String client, final String uri,
@@ -43,4 +43,12 @@ public final class NettyTestProcess extends NetProcess {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see exhi.net.netty.WebProcess#onRedirectProcess(java.lang.String, java.lang.String, java.util.Map)
+	 */
+	protected void onRedirectProcess(final String client, final String uri, final Map<String, String> request)
+	{
+		this.onProcess(client, uri, request);
+	}
 }
