@@ -10,13 +10,14 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import exhi.net.interface1.IResponseUtil;
 import exhi.net.interface1.NetCharset;
 import exhi.net.utils.NetUtils;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
-public class WebUtil {
+public class WebUtil implements IResponseUtil {
 
 	private WebProcess mProcess = null;
 	private NetCharset mCharset = NetCharset.UTF_8;
@@ -41,12 +42,14 @@ public class WebUtil {
 	{
 		this.mTemplatePath = path;
 	}
-	
+
+	@Override
 	public void assign(String key, Object value)
 	{
 		this.mParam.put(key, value);
 	}
-	
+
+	@Override
 	public void display(String name)
 	{
 		NetCharset charset = this.mCharset;
